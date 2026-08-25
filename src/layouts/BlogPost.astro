@@ -29,10 +29,14 @@ interface Props {
 	prev?: { title: string; href: string };
 	next?: { title: string; href: string };
 	related?: RelatedPost[];
+	/** 文章 slug，用于共享元素过渡命名 */
+	slug?: string;
 }
 
-const { title, description, pubDate, updatedDate, heroImage, tags = [], headings = [], readingTime, prev, next, related } =
+const { title, description, pubDate, updatedDate, heroImage, tags = [], headings = [], readingTime, prev, next, related, slug } =
 	Astro.props;
+
+const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
 
 const shareUrl = new URL(Astro.url.pathname, Astro.site).toString();
 const xShare = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`;
@@ -120,10 +124,10 @@ const weiboShare = `https://service.weibo.com/share/share.php?url=${encodeURICom
 			}
 		</header>
 
-		<!-- 头图 -->
+		<!-- 头图（与卡片共享元素过渡） -->
 		{
 			heroImage && (
-				<div class="reveal mx-auto mt-10 max-w-4xl">
+				<div class="reveal mx-auto mt-10 max-w-4xl" transition:name={slug ? `hero-${slug}` : undefined}>
 					<img
 						src={heroImage}
 						alt=""
@@ -134,6 +138,26 @@ const weiboShare = `https://service.weibo.com/share/share.php?url=${encodeURICom
 						class="aspect-2/1 w-full rounded-2xl border border-zinc-200/60 object-cover shadow-lg shadow-zinc-900/5 dark:border-zinc-800"
 					/>
 				</div>
+			)
+		}
+
+		<!-- 移动端折叠目录 -->
+		{
+			hasToc && (
+				<details class="mx-auto mt-8 max-w-3xl rounded-2xl border border-zinc-200/80 bg-white/70 lg:hidden dark:border-zinc-800 dark:bg-zinc-900/70">
+					<summary class="flex cursor-pointer list-none items-center gap-2 px-5 py-3.5 text-sm font-semibold text-zinc-700 select-none dark:text-zinc-300 [&::-webkit-details-marker]:hidden">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-brand-500" aria-hidden="true">
+							<path d="M4 6h16M4 12h16M4 18h10" />
+						</svg>
+						文章目录
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto h-4 w-4 text-zinc-400 transition-transform duration-300 [[open]>&]:rotate-180" aria-hidden="true">
+							<path d="m6 9 6 6 6-6" />
+						</svg>
+					</summary>
+					<div class="border-t border-zinc-100 px-5 py-3 dark:border-zinc-800">
+						<TOC headings={headings} />
+					</div>
+				</details>
 			)
 		}
 

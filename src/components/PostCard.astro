@@ -9,9 +9,11 @@ interface Props {
 	/** 精选卡片（横向大图布局） */
 	featured?: boolean;
 	readingTime?: number;
+	/** 文章 slug，用于共享元素过渡命名 */
+	slug?: string;
 }
 
-const { title, description, pubDate, heroImage, tags = [], href, featured = false, readingTime } = Astro.props;
+const { title, description, pubDate, heroImage, tags = [], href, featured = false, readingTime, slug } = Astro.props;
 import FormattedDate from './FormattedDate.astro';
 ---
 
@@ -24,7 +26,7 @@ import FormattedDate from './FormattedDate.astro';
 		featured ? 'sm:flex-row' : '',
 	]}
 >
-	<div class:list={['relative overflow-hidden', featured ? 'aspect-[16/10] sm:aspect-auto sm:w-1/2' : 'aspect-[16/9]']}>
+	<div class:list={['relative overflow-hidden', featured ? 'aspect-[16/10] sm:aspect-auto sm:w-1/2' : 'aspect-[16/9]']} transition:name={slug ? `hero-${slug}` : undefined}>
 		<img
 			src={heroImage ?? '/blog-placeholder-1.jpg'}
 			alt=""

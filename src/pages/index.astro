@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import StatusBadge from '../components/StatusBadge.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { SITE_TITLE, SITE_DESCRIPTION, AUTHOR_NAME } from '../consts';
 import { projects } from '../data/projects';
 import { getCollection } from 'astro:content';
 import { readingTimeMinutes } from '../lib/utils';
@@ -13,6 +13,10 @@ const posts = (await getCollection('blog')).sort(
 const [featured, ...rest] = posts;
 const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 const featuredProjects = projects.filter((p) => p.featured);
+const tagCounts = new Map<string, number>();
+for (const p of posts) {
+	for (const t of p.data.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+}
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -45,7 +49,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 				class="reveal is-visible mx-auto mt-6 max-w-3xl text-4xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-5xl md:text-6xl dark:text-white"
 			>
 				你好，我是
-				<span class="text-gradient">写博客的人</span>
+				<span class="text-gradient">{AUTHOR_NAME}</span>
 				<br class="hidden sm:block" />
 				欢迎来到我的数字花园
 			</h1>
@@ -53,8 +57,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 			<p
 				class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400"
 			>
-				{SITE_DESCRIPTION}
-				在这里记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，帮助同样在路上的人。
+				一名爱写代码也爱写文字的开发者。在这里记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
 			</p>
 
 			<div class="reveal is-visible mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -109,7 +112,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 					class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60"
 				>
 					<p class="text-2xl font-bold text-zinc-900 dark:text-white">∞</p>
-					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">表达欲</p>
+					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">好奇心</p>
 				</div>
 			</div>
 		</div>
@@ -140,6 +143,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 						tags={featured.data.tags}
 						href={`/blog/${featured.id}/`}
 						readingTime={readingTimeMinutes(featured.body ?? '')}
+						slug={featured.id}
 						featured
 					/>
 				</div>
@@ -163,6 +167,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 								tags={post.data.tags}
 								href={`/blog/${post.id}/`}
 								readingTime={readingTimeMinutes(post.body ?? '')}
+								slug={post.id}
 							/>
 						</div>
 					))}
@@ -237,9 +242,12 @@ const featuredProjects = projects.filter((p) => p.featured);
 						{allTags.map((tag) => (
 							<a
 								href={`/tags/${encodeURIComponent(tag)}`}
-								class="rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:text-brand-600 hover:shadow-md hover:shadow-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
+								class="group inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:text-brand-600 hover:shadow-md hover:shadow-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
 							>
 								#{tag}
+								<span class="rounded-full bg-zinc-100 px-1.5 text-[10px] font-semibold text-zinc-400 transition-colors group-hover:bg-brand-50 group-hover:text-brand-500 dark:bg-zinc-800 dark:text-zinc-500 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-400">
+									{tagCounts.get(tag)}
+								</span>
 							</a>
 						))}
 					</div>

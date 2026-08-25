@@ -18,6 +18,7 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
 
 const fmt = (d: Date) =>
 	`${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+const currentYear = new Date().getFullYear();
 ---
 
 <BaseLayout title={`归档 · ${SITE_TITLE}`} description="全部文章按时间归档">
@@ -37,6 +38,13 @@ const fmt = (d: Date) =>
 					<section class="reveal">
 						<div class="flex items-baseline gap-3">
 							<h2 class="text-2xl font-bold text-zinc-900 dark:text-white">{year}</h2>
+							{
+								year === currentYear && (
+									<span class="rounded-full bg-gradient-to-r from-brand-500 to-violet-500 px-2 py-0.5 text-[10px] font-bold text-white">
+										今年
+									</span>
+								)
+							}
 							<span class="text-sm text-zinc-400 dark:text-zinc-500">
 								{byYear.get(year)!.length} 篇
 							</span>

@@ -1,6 +1,6 @@
 {
-	"name": "astro-blog-starter-larson",
-	"description": "Build a personal website, blog, or portfolio with Astro.",
+	"name": "larson-blog",
+	"description": "Larson 的个人博客 —— 记录技术笔记、项目复盘与生活随想。",
 	"cloudflare": {
 		"label": "Astro Framework Starter",
 		"products": [

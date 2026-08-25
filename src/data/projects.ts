@@ -19,14 +19,16 @@ export const STATUS_LABELS: Record<ProjectStatus, string> = {
 	planned: '规划中',
 };
 
+const GITHUB = 'https://github.com/larson';
+
 export const projects: Project[] = [
 	{
-		name: 'Astro 博客 2.0',
+		name: "Larson's Blog 2.0",
 		description:
-			'你正在浏览的网站。基于 Astro + Cloudflare Workers 的全栈博客，包含评论、全文搜索、后台管理与媒体库。',
-		tags: ['Astro', 'TypeScript', 'Cloudflare'],
+			'你正在浏览的网站——我的个人博客第三次改版。手写的全栈站点：全文搜索、暗色模式、评论系统与后台管理。',
+		tags: ['TypeScript', 'Cloudflare', '全栈'],
 		url: '/',
-		repo: 'https://github.com/withastro/astro',
+		repo: `${GITHUB}/blog`,
 		status: 'active',
 		featured: true,
 		icon: '🚀',
@@ -35,9 +37,9 @@ export const projects: Project[] = [
 	{
 		name: 'Nova UI',
 		description:
-			'轻量级 Vue 组件库，零依赖、按需加载，提供 30+ 常用组件与完整的暗色模式支持。',
+			'我为 side project 造的轮子：轻量组件库，零依赖、按需加载，30+ 常用组件与完整的暗色模式支持。',
 		tags: ['Vue', 'Vite', '组件库'],
-		repo: 'https://github.com/withastro/astro',
+		repo: `${GITHUB}/nova-ui`,
 		status: 'maintained',
 		featured: true,
 		icon: '🎨',
@@ -45,9 +47,9 @@ export const projects: Project[] = [
 	},
 	{
 		name: 'Tiny CLI',
-		description: '一套零依赖的命令行工具集，把日常重复操作压缩成一条命令。',
+		description: '写给自己的一套零依赖命令行工具集，把日常重复操作压缩成一条命令。',
 		tags: ['Node.js', 'CLI'],
-		repo: 'https://github.com/withastro/astro',
+		repo: `${GITHUB}/tiny-cli`,
 		status: 'finished',
 		icon: '⚙️',
 		gradient: 'from-emerald-500 to-teal-400',
@@ -63,9 +65,9 @@ export const projects: Project[] = [
 	},
 	{
 		name: 'MarkFlow',
-		description: 'Markdown 预处理器，支持自定义指令、变量替换与图表语法扩展。',
+		description: 'Markdown 预处理器，支持自定义指令、变量替换与图表语法扩展，本站写作工作流的一部分。',
 		tags: ['Markdown', '编译器'],
-		repo: 'https://github.com/withastro/astro',
+		repo: `${GITHUB}/markflow`,
 		status: 'maintained',
 		icon: '📝',
 		gradient: 'from-rose-500 to-pink-500',

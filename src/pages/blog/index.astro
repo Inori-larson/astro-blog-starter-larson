@@ -61,6 +61,7 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 							tags={post.data.tags}
 							href={`/blog/${post.id}/`}
 							readingTime={readingTimeMinutes(post.body ?? '')}
+							slug={post.id}
 						/>
 					</div>
 				))

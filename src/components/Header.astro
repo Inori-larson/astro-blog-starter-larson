@@ -18,7 +18,8 @@ const firstSegment = '/' + (subpath?.[0] || '');
 ---
 
 <header
-	class="sticky top-0 z-40 border-b border-zinc-200/70 bg-zinc-50/80 backdrop-blur-xl dark:border-zinc-800/70 dark:bg-zinc-950/80"
+	id="site-header"
+	class="sticky top-0 z-40 border-b border-zinc-200/70 bg-zinc-50/80 backdrop-blur-xl transition-transform duration-300 ease-out dark:border-zinc-800/70 dark:bg-zinc-950/80"
 >
 	<nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
 		<a href="/" class="group flex items-center gap-2.5">
@@ -26,7 +27,7 @@ const firstSegment = '/' + (subpath?.[0] || '');
 				class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-lg shadow-brand-500/25 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3"
 				aria-hidden="true"
 			>
-				A
+				L
 			</span>
 			<span class="text-[0.95rem] font-bold text-zinc-900 dark:text-white">
 				{SITE_TITLE}
@@ -137,12 +138,16 @@ const firstSegment = '/' + (subpath?.[0] || '');
 		</div>
 	</nav>
 
-	<!-- 移动端下拉菜单 -->
+	<!-- 移动端下拉菜单（开合动画） -->
 	<div
 		id="mobile-menu"
-		class="hidden border-t border-zinc-200/70 md:hidden dark:border-zinc-800/70"
+		class="grid grid-rows-[0fr] overflow-hidden border-t border-transparent opacity-0 transition-all duration-300 ease-out md:hidden dark:border-transparent"
 	>
-		<nav class="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-3 sm:px-6" aria-label="移动端导航">
+		<div class="min-h-0 overflow-hidden">
+			<nav
+				class="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-3 sm:px-6"
+				aria-label="移动端导航"
+			>
 			{
 				links.map((l) => {
 					const isActive = l.href === pathname || l.href === firstSegment;
@@ -164,7 +169,8 @@ const firstSegment = '/' + (subpath?.[0] || '');
 					);
 				})
 			}
-		</nav>
+			</nav>
+		</div>
 	</div>
 </header>
 
@@ -178,16 +184,60 @@ const firstSegment = '/' + (subpath?.[0] || '');
 		const iconClose = btn.querySelector('[data-icon-close]');
 
 		const setOpen = (open: boolean) => {
-			menu.classList.toggle('hidden', !open);
+			menu.classList.toggle('grid-rows-[0fr]', !open);
+			menu.classList.toggle('grid-rows-[1fr]', open);
+			menu.classList.toggle('opacity-0', !open);
+			menu.classList.toggle('border-transparent', !open);
+			menu.classList.toggle('border-zinc-200/70', open);
+			menu.classList.toggle('dark:border-zinc-800/70', open);
 			iconOpen?.classList.toggle('hidden', open);
 			iconClose?.classList.toggle('hidden', !open);
 			btn.setAttribute('aria-expanded', String(open));
+			// 菜单展开时锁定 header，避免滚动隐藏
+			btn.dataset.menuOpen = String(open);
 		};
 
-		btn.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+		btn.addEventListener('click', () => {
+			const isOpen = menu.classList.contains('grid-rows-[1fr]');
+			setOpen(!isOpen);
+		});
 		menu.querySelectorAll('a').forEach((a) =>
 			a.addEventListener('click', () => setOpen(false)),
 		);
 	};
-	document.addEventListener('astro:page-load', initMobileMenu);
+
+	// 滚动方向感知：下滑隐藏、上滑显示（菜单展开时除外）
+	const initScrollHide = () => {
+		const header = document.getElementById('site-header');
+		if (!header) return;
+
+		let lastY = window.scrollY;
+		let ticking = false;
+		const update = () => {
+			const menuBtn = document.getElementById('mobile-menu-btn');
+			const menuOpen = menuBtn?.dataset.menuOpen === 'true';
+			const y = window.scrollY;
+			const delta = y - lastY;
+			if (!menuOpen && (delta > 8 && y > 120)) {
+				header.style.transform = 'translateY(-100%)';
+			} else if (delta < -8 || y <= 120) {
+				header.style.transform = '';
+			}
+			lastY = y;
+			ticking = false;
+		};
+		const onScroll = () => {
+			if (!ticking) {
+				ticking = true;
+				requestAnimationFrame(update);
+			}
+		};
+		window.removeEventListener('scroll', onScroll);
+		window.addEventListener('scroll', onScroll, { passive: true });
+	};
+
+	document.addEventListener('astro:page-load', () => {
+		initMobileMenu();
+		initScrollHide();
+	});
 </script>

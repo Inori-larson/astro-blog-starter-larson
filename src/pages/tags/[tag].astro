@@ -54,6 +54,7 @@ const { tag, posts } = Astro.props;
 							tags={p.data.tags}
 							href={`/blog/${p.id}/`}
 							readingTime={readingTimeMinutes(p.body ?? '')}
+							slug={p.id}
 						/>
 					</div>
 				))
