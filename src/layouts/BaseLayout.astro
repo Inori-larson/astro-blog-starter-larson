@@ -1,0 +1,52 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	/** 额外注入到 body 之后的页面元素（如阅读进度条） */
+	class?: string;
+}
+
+const { title, description, image, class: className } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} image={image} />
+		<ClientRouter />
+	</head>
+	<body class:list={['flex min-h-screen flex-col', className]}>
+		<Header />
+		<main class="flex-1">
+			<slot />
+		</main>
+		<Footer />
+
+		<script>
+			// 滚动渐入：软导航后重新绑定观察器
+			const initReveal = () => {
+				const els = document.querySelectorAll('.reveal:not(.is-visible)');
+				if (!els.length) return;
+				const io = new IntersectionObserver(
+					(entries) => {
+						for (const entry of entries) {
+							if (entry.isIntersecting) {
+								entry.target.classList.add('is-visible');
+								io.unobserve(entry.target);
+							}
+						}
+					},
+					{ threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
+				);
+				els.forEach((el) => io.observe(el));
+			};
+			document.addEventListener('astro:page-load', initReveal);
+		</script>
+	</body>
+</html>

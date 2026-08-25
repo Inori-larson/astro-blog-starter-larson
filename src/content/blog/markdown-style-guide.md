@@ -3,6 +3,7 @@ title: "Markdown 语法指南"
 description: "这里展示了在 Astro 中编写 Markdown 内容时可以使用的一些基础 Markdown 语法示例。"
 pubDate: "Jun 19 2024"
 heroImage: "/blog-placeholder-1.jpg"
+tags: ["Markdown", "教程", "写作"]
 ---
 
 这里展示了在 Astro 中编写 Markdown 内容时，可以使用的一些基础 Markdown 语法示例。

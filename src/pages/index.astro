@@ -1,47 +1,175 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getCollection } from 'astro:content';
+import { readingTimeMinutes } from '../lib/utils';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const [featured, ...rest] = posts;
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 你好，宇航员！</h1>
-			<p>
-				欢迎使用官方 <a href="https://astro.build/">Astro</a> 博客入门模板。这个模板是一个轻量、极简的起点，适合任何想用
-				Astro 搭建个人网站、博客或作品集的用户。
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+	<!-- Hero -->
+	<section class="relative overflow-hidden">
+		<!-- 装饰光斑 -->
+		<div
+			class="pointer-events-none absolute -top-24 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-500/20 via-violet-500/15 to-fuchsia-500/20 blur-3xl"
+			aria-hidden="true"
+		>
+		</div>
+		<div
+			class="pointer-events-none absolute top-32 -right-20 h-64 w-64 rounded-full bg-fuchsia-400/10 blur-3xl"
+			aria-hidden="true"
+		>
+		</div>
+
+		<div class="relative mx-auto max-w-6xl px-4 pt-20 pb-16 text-center sm:px-6 sm:pt-28 sm:pb-20">
+			<p class="reveal is-visible inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/60 px-4 py-1.5 text-sm text-zinc-500 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">
+				<span class="relative flex h-2 w-2">
+					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+					<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+				</span>
+				正在持续更新中
 			</p>
-			<p>
-				这个模板已经在你的 <code>astro.config.mjs</code> 文件中预先配置了一些集成。你可以通过
-				<a href="https://astro.build/integrations">Astro 集成</a> 自定义你的配置，为项目添加
-				Tailwind、React 或 Vue 等工具。
+
+			<h1
+				class="reveal is-visible mx-auto mt-6 max-w-3xl text-4xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-5xl md:text-6xl dark:text-white"
+			>
+				你好，我是
+				<span class="text-gradient">写博客的人</span>
+				<br class="hidden sm:block" />
+				欢迎来到我的数字花园
+			</h1>
+
+			<p class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400">
+				{SITE_DESCRIPTION}
+				在这里记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，帮助同样在路上的人。
 			</p>
-			<p>以下是一些上手这个模板的思路：</p>
-			<ul>
-				<li>在 <code>src/pages/index.astro</code> 中编辑这个页面</li>
-				<li>在 <code>src/components/Header.astro</code> 中编辑站点导航项</li>
-				<li>在 <code>src/components/Footer.astro</code> 的页脚中加上你的名字</li>
-				<li>查看 <code>src/content/blog/</code> 中自带的博客文章</li>
-				<li>在 <code>src/layouts/BlogPost.astro</code> 中自定义文章页面布局</li>
-			</ul>
-			<p>
-				玩得开心！如果遇到了问题，记得去<a href="https://docs.astro.build/">阅读文档</a
-				>，或者<a href="https://astro.build/chat">加入我们的 Discord</a> 提问。
-			</p>
-			<p>
-				想要一个更有个性的博客模板？可以看看 <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template</a
-				>，由 <a href="https://twitter.com/Charca">Maxi Ferreira</a> 制作。
-			</p>
-		</main>
-		<Footer />
-	</body>
-</html>
+
+			<div class="reveal is-visible mt-9 flex flex-wrap items-center justify-center gap-3">
+				<a
+					href="/blog"
+					class="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-500/40"
+				>
+					浏览博客
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+						aria-hidden="true"
+					>
+						<path d="M5 12h14m-6-6 6 6-6 6"></path>
+					</svg>
+				</a>
+				<a
+					href="/about"
+					class="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/60 px-6 py-3 text-sm font-semibold text-zinc-700 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-300 dark:hover:border-zinc-500"
+				>
+					关于我
+				</a>
+			</div>
+
+			<!-- 统计 -->
+			<div class="reveal is-visible mx-auto mt-14 grid max-w-md grid-cols-3 gap-4">
+				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+					<p class="text-2xl font-bold text-zinc-900 dark:text-white">{posts.length}</p>
+					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">篇文章</p>
+				</div>
+				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+					<p class="text-2xl font-bold text-zinc-900 dark:text-white">{allTags.length}</p>
+					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">个标签</p>
+				</div>
+				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+					<p class="text-2xl font-bold text-zinc-900 dark:text-white">∞</p>
+					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">表达欲</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 精选文章 -->
+	{
+		featured && (
+			<section class="mx-auto max-w-6xl px-4 sm:px-6">
+				<div class="reveal flex items-center justify-between">
+					<h2 class="text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">最新发布</h2>
+					<a
+						href="/blog"
+						class="group inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition-colors hover:text-brand-600 dark:text-zinc-400 dark:hover:text-brand-400"
+					>
+						全部文章
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+							<path d="M5 12h14m-6-6 6 6-6 6" />
+						</svg>
+					</a>
+				</div>
+				<div class="reveal mt-5">
+					<PostCard
+						title={featured.data.title}
+						description={featured.data.description}
+						pubDate={featured.data.pubDate}
+						heroImage={featured.data.heroImage}
+						tags={featured.data.tags}
+						href={`/blog/${featured.id}/`}
+						readingTime={readingTimeMinutes(featured.body ?? '')}
+						featured
+					/>
+				</div>
+			</section>
+		)
+	}
+
+	<!-- 文章网格 -->
+	{
+		rest.length > 0 && (
+			<section class="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
+				<h2 class="reveal text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">更多文章</h2>
+				<div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{rest.map((post, i) => (
+						<div class="reveal" style={`transition-delay:${Math.min(i, 5) * 60}ms`}>
+							<PostCard
+								title={post.data.title}
+								description={post.data.description}
+								pubDate={post.data.pubDate}
+								heroImage={post.data.heroImage}
+								tags={post.data.tags}
+								href={`/blog/${post.id}/`}
+								readingTime={readingTimeMinutes(post.body ?? '')}
+							/>
+						</div>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	<!-- 标签云 -->
+	{
+		allTags.length > 0 && (
+			<section class="mx-auto mt-16 max-w-6xl px-4 pb-20 sm:px-6">
+				<div class="reveal rounded-3xl border border-zinc-200/70 bg-white/60 p-8 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+					<h2 class="text-center text-lg font-bold text-zinc-900 dark:text-white">按标签探索</h2>
+					<div class="mt-5 flex flex-wrap justify-center gap-2.5">
+						{allTags.map((tag) => (
+							<a
+								href={`/blog?tag=${encodeURIComponent(tag)}`}
+								class="rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:text-brand-600 hover:shadow-md hover:shadow-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
+							>
+								{tag}
+							</a>
+						))}
+					</div>
+				</div>
+			</section>
+		)
+	}
+</BaseLayout>
