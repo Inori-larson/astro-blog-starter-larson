@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
+import StatusBadge from '../components/StatusBadge.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { projects } from '../data/projects';
 import { getCollection } from 'astro:content';
 import { readingTimeMinutes } from '../lib/utils';
 
@@ -10,6 +12,7 @@ const posts = (await getCollection('blog')).sort(
 );
 const [featured, ...rest] = posts;
 const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+const featuredProjects = projects.filter((p) => p.featured);
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -28,7 +31,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 		</div>
 
 		<div class="relative mx-auto max-w-6xl px-4 pt-20 pb-16 text-center sm:px-6 sm:pt-28 sm:pb-20">
-			<p class="reveal is-visible inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/60 px-4 py-1.5 text-sm text-zinc-500 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">
+			<p
+				class="reveal is-visible inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/60 px-4 py-1.5 text-sm text-zinc-500 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400"
+			>
 				<span class="relative flex h-2 w-2">
 					<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
 					<span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
@@ -45,7 +50,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 				欢迎来到我的数字花园
 			</h1>
 
-			<p class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400">
+			<p
+				class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400"
+			>
 				{SITE_DESCRIPTION}
 				在这里记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，帮助同样在路上的人。
 			</p>
@@ -71,24 +78,36 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 					</svg>
 				</a>
 				<a
-					href="/about"
+					href="/projects"
 					class="inline-flex items-center gap-2 rounded-full border border-zinc-300 bg-white/60 px-6 py-3 text-sm font-semibold text-zinc-700 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-300 dark:hover:border-zinc-500"
 				>
-					关于我
+					看看项目
 				</a>
 			</div>
 
 			<!-- 统计 -->
-			<div class="reveal is-visible mx-auto mt-14 grid max-w-md grid-cols-3 gap-4">
-				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+			<div class="reveal is-visible mx-auto mt-14 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-4">
+				<div
+					class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60"
+				>
 					<p class="text-2xl font-bold text-zinc-900 dark:text-white">{posts.length}</p>
 					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">篇文章</p>
 				</div>
-				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+				<div
+					class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60"
+				>
 					<p class="text-2xl font-bold text-zinc-900 dark:text-white">{allTags.length}</p>
 					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">个标签</p>
 				</div>
-				<div class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60">
+				<div
+					class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60"
+				>
+					<p class="text-2xl font-bold text-zinc-900 dark:text-white">{projects.length}</p>
+					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">个项目</p>
+				</div>
+				<div
+					class="rounded-2xl border border-zinc-200/70 bg-white/60 p-4 backdrop-blur dark:border-zinc-800/70 dark:bg-zinc-900/60"
+				>
 					<p class="text-2xl font-bold text-zinc-900 dark:text-white">∞</p>
 					<p class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-500">表达欲</p>
 				</div>
@@ -152,6 +171,62 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 		)
 	}
 
+	<!-- 我的项目 -->
+	{
+		featuredProjects.length > 0 && (
+			<section class="mx-auto mt-16 max-w-6xl px-4 sm:px-6">
+				<div class="reveal flex items-center justify-between">
+					<h2 class="text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">我的项目</h2>
+					<a
+						href="/projects"
+						class="group inline-flex items-center gap-1 text-sm font-medium text-zinc-500 transition-colors hover:text-brand-600 dark:text-zinc-400 dark:hover:text-brand-400"
+					>
+						全部项目
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true">
+							<path d="M5 12h14m-6-6 6 6-6 6" />
+						</svg>
+					</a>
+				</div>
+				<div class="reveal mt-5 grid gap-4 sm:grid-cols-2">
+					{featuredProjects.map((p) => (
+						<a
+							href={p.url ?? p.repo ?? '/projects'}
+							class="group flex gap-4 rounded-2xl border border-zinc-200/80 bg-white p-5 transition-all hover:-translate-y-1 hover:border-brand-300/60 hover:shadow-xl hover:shadow-brand-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-brand-500/40"
+						>
+							<span
+								class:list={[
+									'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-2xl shadow-lg',
+									p.gradient,
+								]}
+								aria-hidden="true"
+							>
+								{p.icon}
+							</span>
+							<span class="min-w-0 flex-1">
+								<span class="flex flex-wrap items-center gap-2">
+									<span class="font-bold text-zinc-900 transition-colors group-hover:text-brand-600 dark:text-white dark:group-hover:text-brand-400">
+										{p.name}
+									</span>
+									<StatusBadge status={p.status} />
+								</span>
+								<span class="mt-1 line-clamp-2 block text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+									{p.description}
+								</span>
+								<span class="mt-2 flex flex-wrap gap-1.5">
+									{p.tags.map((t) => (
+										<span class="rounded bg-zinc-100 px-2 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
+											{t}
+										</span>
+									))}
+								</span>
+							</span>
+						</a>
+					))}
+				</div>
+			</section>
+		)
+	}
+
 	<!-- 标签云 -->
 	{
 		allTags.length > 0 && (
@@ -161,10 +236,10 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 					<div class="mt-5 flex flex-wrap justify-center gap-2.5">
 						{allTags.map((tag) => (
 							<a
-								href={`/blog?tag=${encodeURIComponent(tag)}`}
+								href={`/tags/${encodeURIComponent(tag)}`}
 								class="rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm text-zinc-600 transition-all hover:-translate-y-0.5 hover:border-brand-400 hover:text-brand-600 hover:shadow-md hover:shadow-brand-500/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
 							>
-								{tag}
+								#{tag}
 							</a>
 						))}
 					</div>

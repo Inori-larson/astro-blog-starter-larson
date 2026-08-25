@@ -2,6 +2,19 @@
 import HeaderLink from './HeaderLink.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { SITE_TITLE } from '../consts';
+
+const links = [
+	{ href: '/', label: '首页' },
+	{ href: '/blog', label: '博客' },
+	{ href: '/archive', label: '归档' },
+	{ href: '/tags', label: '标签' },
+	{ href: '/projects', label: '项目' },
+	{ href: '/about', label: '关于' },
+];
+
+const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, '');
+const subpath = pathname.match(/[^\/]+/g);
+const firstSegment = '/' + (subpath?.[0] || '');
 ---
 
 <header
@@ -20,14 +33,161 @@ import { SITE_TITLE } from '../consts';
 			</span>
 		</a>
 
-		<div class="flex items-center gap-1 sm:gap-2">
-			<div class="flex items-center">
-				<HeaderLink href="/">首页</HeaderLink>
-				<HeaderLink href="/blog">博客</HeaderLink>
-				<HeaderLink href="/about">关于</HeaderLink>
-			</div>
+		<!-- 桌面导航 -->
+		<div class="hidden items-center gap-1 md:flex">
+			{links.map((l) => <HeaderLink href={l.href}>{l.label}</HeaderLink>)}
+		</div>
+
+		<div class="flex items-center gap-1">
+			<!-- 搜索按钮（宽屏胶囊样式） -->
+			<button
+				type="button"
+				data-search-open
+				class="hidden h-9 items-center gap-2 rounded-full border border-zinc-200 bg-white/60 pr-1.5 pl-3 text-sm text-zinc-400 transition-all hover:border-zinc-300 hover:text-zinc-600 lg:flex dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:border-zinc-600 dark:hover:text-zinc-300"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-4 w-4"
+					aria-hidden="true"
+				>
+					<circle cx="11" cy="11" r="8"></circle>
+					<path d="m21 21-4.3-4.3"></path>
+				</svg>
+				<span>搜索…</span>
+				<kbd
+					data-kbd-platform
+					class="rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
+				>
+					Ctrl K
+				</kbd>
+			</button>
+
+			<!-- 搜索按钮（图标样式） -->
+			<button
+				type="button"
+				data-search-open
+				aria-label="搜索"
+				class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-[1.15rem] w-[1.15rem]"
+					aria-hidden="true"
+				>
+					<circle cx="11" cy="11" r="8"></circle>
+					<path d="m21 21-4.3-4.3"></path>
+				</svg>
+			</button>
+
 			<span class="mx-1 h-5 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true"></span>
 			<ThemeToggle />
+
+			<!-- 移动端菜单按钮 -->
+			<button
+				id="mobile-menu-btn"
+				type="button"
+				aria-label="打开菜单"
+				aria-expanded="false"
+				aria-controls="mobile-menu"
+				class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 md:hidden dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+			>
+				<!-- 汉堡图标 -->
+				<svg
+					data-icon-open
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-5 w-5"
+					aria-hidden="true"
+				>
+					<path d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+				<!-- 关闭图标 -->
+				<svg
+					data-icon-close
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="hidden h-5 w-5"
+					aria-hidden="true"
+				>
+					<path d="M18 6 6 18M6 6l12 12"></path>
+				</svg>
+			</button>
 		</div>
 	</nav>
+
+	<!-- 移动端下拉菜单 -->
+	<div
+		id="mobile-menu"
+		class="hidden border-t border-zinc-200/70 md:hidden dark:border-zinc-800/70"
+	>
+		<nav class="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-3 sm:px-6" aria-label="移动端导航">
+			{
+				links.map((l) => {
+					const isActive = l.href === pathname || l.href === firstSegment;
+					return (
+						<a
+							href={l.href}
+							class:list={[
+								'flex items-center justify-between rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors',
+								isActive
+									? 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400'
+									: 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900',
+							]}
+						>
+							{l.label}
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 text-zinc-300 dark:text-zinc-600" aria-hidden="true">
+								<path d="m9 18 6-6-6-6" />
+							</svg>
+						</a>
+					);
+				})
+			}
+		</nav>
+	</div>
 </header>
+
+<script>
+	const initMobileMenu = () => {
+		const btn = document.getElementById('mobile-menu-btn');
+		const menu = document.getElementById('mobile-menu');
+		if (!btn || !menu) return;
+
+		const iconOpen = btn.querySelector('[data-icon-open]');
+		const iconClose = btn.querySelector('[data-icon-close]');
+
+		const setOpen = (open: boolean) => {
+			menu.classList.toggle('hidden', !open);
+			iconOpen?.classList.toggle('hidden', open);
+			iconClose?.classList.toggle('hidden', !open);
+			btn.setAttribute('aria-expanded', String(open));
+		};
+
+		btn.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+		menu.querySelectorAll('a').forEach((a) =>
+			a.addEventListener('click', () => setOpen(false)),
+		);
+	};
+	document.addEventListener('astro:page-load', initMobileMenu);
+</script>

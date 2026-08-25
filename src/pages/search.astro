@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<BaseLayout title={`搜索 · ${SITE_TITLE}`} description="搜索全站文章">
+	<section class="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+		<header class="reveal is-visible text-center">
+			<h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">
+				<span class="text-gradient">搜索</span>
+			</h1>
+			<p class="mt-3 text-zinc-500 dark:text-zinc-400">输入关键词，在全站文章中查找内容</p>
+		</header>
+
+		<div
+			class="reveal is-visible mt-8 flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white px-4 shadow-sm transition-colors focus-within:border-brand-400 dark:border-zinc-800 dark:bg-zinc-900 dark:focus-within:border-brand-500"
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="h-5 w-5 shrink-0 text-zinc-400"
+				aria-hidden="true"
+			>
+				<circle cx="11" cy="11" r="8"></circle>
+				<path d="m21 21-4.3-4.3"></path>
+			</svg>
+			<input
+				id="page-search-input"
+				type="text"
+				placeholder="搜索文章…"
+				autocomplete="off"
+				spellcheck="false"
+				class="h-14 w-full bg-transparent text-[15px] text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+			/>
+		</div>
+
+		<div id="page-search-results" class="mt-6 space-y-2"></div>
+		<p
+			id="page-search-empty"
+			class="hidden rounded-2xl border border-dashed border-zinc-300 py-12 text-center text-sm text-zinc-400 dark:border-zinc-700 dark:text-zinc-500"
+		>
+			未找到相关文章，换个关键词试试
+		</p>
+	</section>
+</BaseLayout>
+
+<script>
+	import {
+		loadIndex,
+		runSearch,
+		highlight,
+		escapeHtml,
+		type SearchDoc,
+	} from '../lib/search-client';
+
+	let indexPromise: Promise<SearchDoc[]> | null = null;
+
+	const fmtDate = (iso: string) =>
+		new Date(iso).toLocaleDateString('zh-CN', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+
+	async function render(query: string) {
+		const results = document.getElementById('page-search-results');
+		const empty = document.getElementById('page-search-empty');
+		if (!results || !empty) return;
+
+		results.innerHTML = '';
+		const q = query.trim();
+		if (!q) {
+			empty.classList.add('hidden');
+			return;
+		}
+
+		const docs = (await indexPromise) ?? [];
+		const hits = runSearch(docs, q);
+		if (!hits.length) {
+			empty.classList.remove('hidden');
+			return;
+		}
+		empty.classList.add('hidden');
+
+		const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+		for (const hit of hits) {
+			const a = document.createElement('a');
+			a.href = hit.doc.url;
+			a.className =
+				'block rounded-2xl border border-zinc-200/70 bg-white/60 px-5 py-4 transition-all hover:border-brand-300/60 hover:bg-white hover:shadow-md hover:shadow-brand-500/5 dark:border-zinc-800/70 dark:bg-zinc-900/60 dark:hover:border-brand-500/40 dark:hover:bg-zinc-900';
+			const tags = hit.doc.tags
+				.map(
+					(t) =>
+						`<span class="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">${escapeHtml(t)}</span>`,
+				)
+				.join('');
+			a.innerHTML = `
+				<div class="flex items-baseline justify-between gap-3">
+					<span class="font-bold text-zinc-900 dark:text-white">${highlight(hit.doc.title, terms)}</span>
+					<time class="shrink-0 text-xs text-zinc-400 dark:text-zinc-600">${fmtDate(hit.doc.date)}</time>
+				</div>
+				<p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">${highlight(hit.doc.snippet, terms)}</p>
+				${tags ? `<div class="mt-2 flex flex-wrap gap-1">${tags}</div>` : ''}
+			`;
+			results.appendChild(a);
+		}
+	}
+
+	const init = () => {
+		const input = document.getElementById('page-search-input') as HTMLInputElement | null;
+		if (!input) return;
+		if (!indexPromise) indexPromise = loadIndex();
+		input.addEventListener('input', () => void render(input.value));
+		input.focus();
+	};
+	document.addEventListener('astro:page-load', init);
+</script>

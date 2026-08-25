@@ -32,6 +32,26 @@ interface Props {
 const { post, prev, next } = Astro.props;
 const { Content, headings } = await render(post);
 const minutes = readingTimeMinutes(post.body ?? '');
+
+// 相关文章：按共享标签数排序，同分则取更新的
+const allPosts = await getCollection('blog');
+const related = allPosts
+	.filter((p) => p.id !== post.id)
+	.map((p) => ({
+		post: p,
+		score: p.data.tags.filter((t) => post.data.tags.includes(t)).length,
+	}))
+	.sort(
+		(a, b) =>
+			b.score - a.score ||
+			b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf(),
+	)
+	.slice(0, 3)
+	.map(({ post: p }) => ({
+		title: p.data.title,
+		href: `/blog/${p.id}/`,
+		readingTime: readingTimeMinutes(p.body ?? ''),
+	}));
 ---
 
 <BlogPost
@@ -45,6 +65,7 @@ const minutes = readingTimeMinutes(post.body ?? '');
 	readingTime={minutes}
 	{prev}
 	{next}
+	{related}
 >
 	<Content />
 </BlogPost>

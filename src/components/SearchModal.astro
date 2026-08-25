@@ -1,0 +1,197 @@
+---
+// 全站搜索弹窗：Ctrl/⌘+K 或点击头部搜索按钮打开
+---
+
+<div
+	id="search-modal"
+	class="fixed inset-0 z-[60] hidden"
+	role="dialog"
+	aria-modal="true"
+	aria-label="站内搜索"
+>
+	<div id="search-backdrop" class="absolute inset-0 bg-zinc-950/40 backdrop-blur-sm"></div>
+
+	<div
+		class="relative mx-auto mt-[10vh] w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+	>
+		<!-- 输入区 -->
+		<div class="flex items-center gap-3 border-b border-zinc-100 px-4 dark:border-zinc-800">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class="h-5 w-5 shrink-0 text-zinc-400"
+				aria-hidden="true"
+			>
+				<circle cx="11" cy="11" r="8"></circle>
+				<path d="m21 21-4.3-4.3"></path>
+			</svg>
+			<input
+				id="search-input"
+				type="text"
+				placeholder="搜索文章…"
+				autocomplete="off"
+				spellcheck="false"
+				class="w-full bg-transparent py-4 text-[15px] text-zinc-900 outline-none placeholder:text-zinc-400 dark:text-white dark:placeholder:text-zinc-500"
+			/>
+			<kbd
+				class="hidden shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[10px] text-zinc-400 sm:block dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
+			>
+				Esc
+			</kbd>
+		</div>
+
+		<!-- 结果区 -->
+		<div id="search-results" class="max-h-[55vh] overflow-y-auto p-2"></div>
+
+		<!-- 无结果 -->
+		<p
+			id="search-empty"
+			class="hidden px-4 py-10 text-center text-sm text-zinc-400 dark:text-zinc-500"
+		>
+			未找到相关文章，换个关键词试试
+		</p>
+
+		<!-- 初始提示 -->
+		<div id="search-hint" class="px-4 py-10 text-center text-sm text-zinc-400 dark:text-zinc-500">
+			输入关键词，搜索全站文章
+			<span class="mt-1.5 block text-xs text-zinc-400/70 dark:text-zinc-600">
+				↑ ↓ 选择 · Enter 打开 · Esc 关闭
+			</span>
+		</div>
+	</div>
+</div>
+
+<script>
+	import {
+		loadIndex,
+		runSearch,
+		highlight,
+		escapeHtml,
+		type SearchDoc,
+	} from '../lib/search-client';
+
+	let indexPromise: Promise<SearchDoc[]> | null = null;
+	let activeIdx = -1;
+
+	const fmtDate = (iso: string) =>
+		new Date(iso).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+
+	async function openModal() {
+		const modal = document.getElementById('search-modal');
+		const input = document.getElementById('search-input') as HTMLInputElement | null;
+		if (!modal || !input) return;
+		modal.classList.remove('hidden');
+		document.body.style.overflow = 'hidden';
+		if (!indexPromise) indexPromise = loadIndex();
+		requestAnimationFrame(() => input.focus());
+	}
+
+	function closeModal() {
+		document.getElementById('search-modal')?.classList.add('hidden');
+		document.body.style.overflow = '';
+	}
+
+	async function render(query: string) {
+		const results = document.getElementById('search-results');
+		const empty = document.getElementById('search-empty');
+		const hint = document.getElementById('search-hint');
+		if (!results || !empty || !hint) return;
+
+		activeIdx = -1;
+		results.innerHTML = '';
+
+		const q = query.trim();
+		if (!q) {
+			empty.classList.add('hidden');
+			hint.classList.remove('hidden');
+			return;
+		}
+		hint.classList.add('hidden');
+
+		const docs = (await indexPromise) ?? [];
+		const hits = runSearch(docs, q);
+		if (!hits.length) {
+			empty.classList.remove('hidden');
+			return;
+		}
+		empty.classList.add('hidden');
+
+		const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+		for (const hit of hits) {
+			const a = document.createElement('a');
+			a.href = hit.doc.url;
+			a.setAttribute('data-hit', hit.doc.url);
+			a.className =
+				'block rounded-xl px-3 py-2.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/70';
+			const tags = hit.doc.tags
+				.slice(0, 3)
+				.map(
+					(t) =>
+						`<span class="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">${escapeHtml(t)}</span>`,
+				)
+				.join('');
+			a.innerHTML = `
+				<div class="flex items-baseline justify-between gap-3">
+					<span class="truncate text-sm font-semibold text-zinc-800 dark:text-zinc-200">${highlight(hit.doc.title, terms)}</span>
+					<time class="shrink-0 font-mono text-[10px] text-zinc-400 dark:text-zinc-600">${fmtDate(hit.doc.date)}</time>
+				</div>
+				<p class="mt-1 line-clamp-1 text-xs text-zinc-500 dark:text-zinc-400">${highlight(hit.doc.snippet, terms)}</p>
+				${tags ? `<div class="mt-1.5 flex flex-wrap gap-1">${tags}</div>` : ''}
+			`;
+			results.appendChild(a);
+		}
+	}
+
+	const init = () => {
+		// 平台相关快捷键提示（Mac 显示 ⌘ K）
+		const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+		document.querySelectorAll('[data-kbd-platform]').forEach((kbd) => {
+			kbd.textContent = isMac ? '⌘ K' : 'Ctrl K';
+		});
+
+		document.querySelectorAll('[data-search-open]').forEach((btn) => {
+			btn.addEventListener('click', () => void openModal());
+		});
+		document.getElementById('search-backdrop')?.addEventListener('click', closeModal);
+
+		const input = document.getElementById('search-input') as HTMLInputElement | null;
+		input?.addEventListener('input', () => void render(input.value));
+		input?.addEventListener('keydown', (e) => {
+			if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+				e.preventDefault();
+				const items = document.querySelectorAll('#search-results [data-hit]');
+				if (!items.length) return;
+				activeIdx =
+					e.key === 'ArrowDown'
+						? (activeIdx + 1) % items.length
+						: (activeIdx - 1 + items.length) % items.length;
+				items.forEach((el, i) => el.classList.toggle('search-active', i === activeIdx));
+				items[activeIdx]?.scrollIntoView({ block: 'nearest' });
+			} else if (e.key === 'Enter') {
+				const items = document.querySelectorAll('#search-results [data-hit]');
+				const target = items[Math.max(activeIdx, 0)] as HTMLElement | null;
+				const href = target?.getAttribute('data-hit');
+				if (href) window.location.href = href;
+			}
+		});
+	};
+
+	// 全局快捷键（模块仅执行一次）
+	window.addEventListener('keydown', (e) => {
+		if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+			e.preventDefault();
+			const modal = document.getElementById('search-modal');
+			if (modal?.classList.contains('hidden')) void openModal();
+			else closeModal();
+		} else if (e.key === 'Escape') {
+			closeModal();
+		}
+	});
+
+	document.addEventListener('astro:page-load', init);
+</script>

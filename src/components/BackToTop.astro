@@ -1,0 +1,54 @@
+---
+// 回到顶部悬浮按钮：滚动超过一屏后出现
+---
+
+<button
+	id="back-to-top"
+	type="button"
+	aria-label="回到顶部"
+	class="fixed right-5 bottom-5 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200/80 bg-white/90 text-zinc-500 shadow-lg shadow-zinc-900/5 backdrop-blur transition-all duration-300 opacity-0 pointer-events-none translate-y-3 hover:border-brand-400 hover:text-brand-600 sm:right-6 sm:bottom-6 dark:border-zinc-700/80 dark:bg-zinc-900/90 dark:text-zinc-400 dark:hover:border-brand-500 dark:hover:text-brand-400"
+>
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="h-5 w-5"
+		aria-hidden="true"
+	>
+		<path d="m5 12 7-7 7 7"></path>
+		<path d="M12 19V5"></path>
+	</svg>
+</button>
+
+<script>
+	const init = () => {
+		const btn = document.getElementById('back-to-top');
+		if (!btn) return;
+
+		let ticking = false;
+		const update = () => {
+			const show = window.scrollY > 400;
+			btn.classList.toggle('opacity-0', !show);
+			btn.classList.toggle('pointer-events-none', !show);
+			btn.classList.toggle('translate-y-3', !show);
+			ticking = false;
+		};
+		const onScroll = () => {
+			if (!ticking) {
+				ticking = true;
+				requestAnimationFrame(update);
+			}
+		};
+
+		window.removeEventListener('scroll', onScroll);
+		window.addEventListener('scroll', onScroll, { passive: true });
+		update();
+
+		btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+	};
+	document.addEventListener('astro:page-load', init);
+</script>
