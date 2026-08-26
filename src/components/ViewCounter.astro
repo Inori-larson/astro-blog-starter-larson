@@ -51,7 +51,10 @@ const { slug, initial = 0 } = Astro.props;
 		}
 		void (async () => {
 			try {
-				const res = await fetch(`/api/posts/${slug}/view`, { method: 'POST' });
+				const res = await fetch(`/api/posts/${slug}/view`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+				});
 				if (!res.ok) return;
 				const data = (await res.json()) as { total: number };
 				countEl.textContent = `${data.total} 次浏览`;

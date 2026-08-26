@@ -61,7 +61,10 @@ const { slug, initialCount = 0, initialLiked = false } = Astro.props;
 			busy = true;
 			const slug = root.dataset.slug!;
 			try {
-				const res = await fetch(`/api/posts/${slug}/like`, { method: 'POST' });
+				const res = await fetch(`/api/posts/${slug}/like`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+				});
 				if (res.status === 429) {
 					countEl.textContent = '太快啦';
 					setTimeout(() => (countEl.textContent = root.dataset.count || '点赞'), 1500);
