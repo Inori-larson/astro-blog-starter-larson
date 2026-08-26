@@ -10,15 +10,15 @@ const posts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
 
 const byYear = new Map<number, typeof posts>();
 for (const p of posts) {
-	const year = p.publishedAt.getFullYear();
+	const year = new Date(p.publishedAt).getFullYear();
 	if (!byYear.has(year)) byYear.set(year, []);
 	byYear.get(year)!.push(p);
 }
 const years = [...byYear.keys()].sort((a, b) => b - a);
 const currentYear = new Date().getFullYear();
 
-const fmt = (d: Date) =>
-	`${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+const fmt = (d: Date | string) =>
+	`${String(new Date(d).getMonth() + 1).padStart(2, '0')}.${String(new Date(d).getDate()).padStart(2, '0')}`;
 ---
 
 <BaseLayout title={`归档 · ${SITE_TITLE}`} description="全部文章按时间归档">

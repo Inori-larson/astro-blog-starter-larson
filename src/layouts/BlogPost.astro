@@ -20,8 +20,8 @@ interface RelatedPost {
 interface Props {
 	title: string;
 	description: string;
-	pubDate: Date;
-	updatedDate?: Date;
+	pubDate: Date | string;
+	updatedDate?: Date | string;
 	heroImage?: string;
 	tags?: string[];
 	headings?: Heading[];

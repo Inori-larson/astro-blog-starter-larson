@@ -8,6 +8,17 @@
 const mem = new Map<string, { value: unknown; expires: number }>();
 const MEM_MAX = 200;
 
+/** 已知日期字段：JSON 往返后还原为 Date 对象 */
+const DATE_KEYS = new Set(['publishedAt', 'updatedAt', 'createdAt', 'date']);
+const ISO_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+
+function revive(_key: string, value: unknown): unknown {
+	if (typeof value === 'string' && DATE_KEYS.has(_key) && ISO_PATTERN.test(value)) {
+		return new Date(value);
+	}
+	return value;
+}
+
 function memGet<T>(key: string): T | undefined {
 	const hit = mem.get(key);
 	if (!hit) return undefined;
@@ -44,14 +55,14 @@ export async function cached<T>(ctx: CacheContext, key: string, ttlSeconds: numb
 	const memHit = memGet<T>(key);
 	if (memHit !== undefined) return memHit;
 
-	// L2 KV（值需可 JSON 序列化；函数结果若不可序列化则跳过 KV 直接过内存）
+	// L2 KV（以纯文本读取后用 reviver 还原日期字段）
 	const kv = await getKv(ctx);
 	let kvHit: T | undefined;
 	if (kv) {
 		try {
-			const raw = await kv.get(`c:${key}`, 'json');
+			const raw = await kv.get(`c:${key}`, 'text');
 			if (raw !== null) {
-				kvHit = raw as T;
+				kvHit = JSON.parse(raw, revive) as T;
 				memSet(key, kvHit, ttlSeconds * 1000);
 				return kvHit;
 			}
