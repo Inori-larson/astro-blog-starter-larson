@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SearchModal from '../components/SearchModal.astro';
 import BackToTop from '../components/BackToTop.astro';
+import WorldDecor from '../components/WorldDecor.astro';
 import { ClientRouter } from 'astro:transitions';
 
 interface Props {
@@ -23,12 +24,15 @@ const { title, description, image, class: className } = Astro.props;
 		<BaseHead title={title} description={description} image={image} />
 		<ClientRouter />
 	</head>
-	<body class:list={['flex min-h-screen flex-col', className]}>
-		<Header />
-		<main class="flex-1">
-			<slot />
-		</main>
-		<Footer />
+	<body class:list={['relative flex min-h-screen flex-col', className]}>
+		<WorldDecor />
+		<div class="relative z-10 flex min-h-screen flex-col">
+			<Header />
+			<main class="flex-1">
+				<slot />
+			</main>
+			<Footer />
+		</div>
 		<BackToTop />
 		<SearchModal />
 

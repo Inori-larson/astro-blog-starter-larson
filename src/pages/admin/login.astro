@@ -1,6 +1,7 @@
 ---
 import { SITE_TITLE, AUTHOR_NAME } from '../../consts';
 import { getSessionFromRequest } from '../../lib/auth';
+import WorldDecor from '../../components/WorldDecor.astro';
 
 export const prerender = false;
 
@@ -37,6 +38,7 @@ if (session) return Astro.redirect('/admin/');
 	</head>
 
 	<body class="relative flex min-h-screen items-center justify-center overflow-hidden bg-zinc-50 font-sans antialiased dark:bg-zinc-950">
+		<WorldDecor />
 		<!-- 背景装饰：光斑 + 网格 -->
 		<div class="pointer-events-none absolute inset-0" aria-hidden="true">
 			<div

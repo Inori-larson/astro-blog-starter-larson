@@ -1,0 +1,127 @@
+---
+/**
+ * 世界观背景装饰层（程序化 SVG，无版权风险）
+ * 浅色 = 碧蓝航线：海浪纹、船锚、罗盘、纸飞机
+ * 暗色 = Fate：魔术阵、令咒纹、齿轮剑
+ * 各自只在自己世界观显示，低透明度不干扰阅读
+ */
+---
+
+<!-- ==================== 碧蓝航线（浅色）装饰 ==================== -->
+<div class="pointer-events-none fixed inset-0 z-0 overflow-hidden dark:hidden" aria-hidden="true">
+	<!-- 远景：起伏海浪线（左下） -->
+	<svg class="absolute -bottom-8 -left-16 w-[34rem] opacity-[0.16]" viewBox="0 0 600 300" fill="none">
+		<path
+			d="M0 180 C60 140 120 220 190 185 C260 150 300 230 380 195 C460 160 520 225 600 190"
+			stroke="#3b82f6"
+			stroke-width="3"
+			stroke-linecap="round"
+		></path>
+		<path
+			d="M0 220 C70 185 140 255 220 222 C300 190 350 260 430 228 C510 196 560 250 600 225"
+			stroke="#60a5fa"
+			stroke-width="2"
+			stroke-linecap="round"
+		></path>
+		<path
+			d="M0 260 C80 232 150 288 240 260 C330 232 380 285 470 262 C550 242 580 275 600 262"
+			stroke="#93c5fd"
+			stroke-width="2"
+			stroke-linecap="round"
+		></path>
+	</svg>
+
+	<!-- 右下：船锚 -->
+	<svg class="absolute -right-10 bottom-24 h-56 w-56 rotate-12 opacity-[0.07]" viewBox="0 0 24 24" fill="none" stroke="#1d5fb8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+		<circle cx="12" cy="5" r="2.5"></circle>
+		<path d="M12 7.5v13"></path>
+		<path d="M5 12H3a9 9 0 0 0 18 0h-2"></path>
+		<path d="M8.5 10.5h7"></path>
+	</svg>
+
+	<!-- 左上：罗盘（航海钟） -->
+	<svg class="absolute -top-6 -left-8 h-64 w-64 opacity-[0.08]" viewBox="0 0 100 100" fill="none" stroke="#1d5fb8" stroke-width="1">
+		<circle cx="50" cy="50" r="46"></circle>
+		<circle cx="50" cy="50" r="36"></circle>
+		<circle cx="50" cy="50" r="3" fill="#1d5fb8"></circle>
+		<path d="M50 8 L54 44 L50 50 L46 44 Z" fill="#3b82f6" stroke="none"></path>
+		<path d="M50 92 L46 56 L50 50 L54 56 Z" fill="#93c5fd" stroke="none"></path>
+		<path d="M8 50 L44 46 L50 50 L44 54 Z" fill="#93c5fd" stroke="none"></path>
+		<path d="M92 50 L56 54 L50 50 L56 46 Z" fill="#3b82f6" stroke="none"></path>
+		<path d="M20 20 l8 8 M80 20 l-8 8 M20 80 l8 -8 M80 80 l-8 -8" stroke-width="2"></path>
+	</svg>
+
+	<!-- 右上：纸飞机航线 -->
+	<svg class="absolute top-24 right-16 h-32 w-52 opacity-[0.12]" viewBox="0 0 200 120" fill="none">
+		<path d="M10 100 C60 80 90 90 120 60 C150 30 170 40 190 20" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="5 7" stroke-linecap="round"></path>
+		<path d="M190 20 l-2 10 -8-4 z" fill="#3b82f6"></path>
+		<path d="M178 40 l-2 8 -7-3 z" fill="#93c5fd"></path>
+		<path d="M150 70 l-2 7 -6-3 z" fill="#60a5fa"></path>
+	</svg>
+
+	<!-- 散落的星光/水珠 -->
+	<svg class="absolute inset-0 h-full w-full opacity-[0.25]" viewBox="0 0 100 100" preserveAspectRatio="none">
+		<circle cx="8%" cy="18%" r="0.35" fill="#3b82f6"><animate attributeName="opacity" values="0.9;0.2;0.9" dur="4s" repeatCount="indefinite"/></circle>
+		<circle cx="22%" cy="8%" r="0.25" fill="#60a5fa"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="3s" repeatCount="indefinite"/></circle>
+		<circle cx="75%" cy="12%" r="0.3" fill="#3b82f6"><animate attributeName="opacity" values="0.8;0.1;0.8" dur="5s" repeatCount="indefinite"/></circle>
+		<circle cx="90%" cy="30%" r="0.25" fill="#60a5fa"><animate attributeName="opacity" values="0.2;0.8;0.2" dur="3.5s" repeatCount="indefinite"/></circle>
+		<circle cx="15%" cy="65%" r="0.3" fill="#93c5fd"><animate attributeName="opacity" values="0.6;0.15;0.6" dur="4.5s" repeatCount="indefinite"/></circle>
+		<circle cx="85%" cy="75%" r="0.35" fill="#60a5fa"><animate attributeName="opacity" values="0.3;0.85;0.3" dur="3.8s" repeatCount="indefinite"/></circle>
+		<circle cx="60%" cy="88%" r="0.25" fill="#3b82f6"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="4.2s" repeatCount="indefinite"/></circle>
+	</svg>
+</div>
+
+<!-- ==================== Fate（暗色）装饰 ==================== -->
+<div class="pointer-events-none fixed inset-0 z-0 overflow-hidden hidden dark:block" aria-hidden="true">
+	<!-- 右下：大魔术阵（三层同心圆 + 卢恩符文 + 六芒星） -->
+	<svg class="absolute -right-24 -bottom-24 h-[30rem] w-[30rem] opacity-[0.13]" viewBox="0 0 400 400" fill="none" stroke="#d4af37" stroke-width="1.2">
+		<circle cx="200" cy="200" r="190"></circle>
+		<circle cx="200" cy="200" r="160" stroke-dasharray="3 6"></circle>
+		<circle cx="200" cy="200" r="120"></circle>
+		<circle cx="200" cy="200" r="60" stroke-width="2"></circle>
+		<!-- 六芒星 -->
+		<path d="M200 80 L265 195 L135 195 Z" stroke-width="1.5"></path>
+		<path d="M200 320 L135 205 L265 205 Z" stroke-width="1.5"></path>
+		<!-- 内接几何线 -->
+		<path d="M200 40 L200 360 M40 200 L360 200" stroke-width="0.8" opacity="0.6"></path>
+		<path d="M87 87 L313 313 M313 87 L87 313" stroke-width="0.8" opacity="0.6"></path>
+		<!-- 符文刻痕 -->
+		<g stroke-width="1.6" opacity="0.9">
+			<path d="M200 12 v14 M194 18 h12"></path>
+			<path d="M388 200 h-14 M382 194 v12"></path>
+			<path d="M200 388 v-14 M194 382 h12"></path>
+			<path d="M12 200 h14 M18 194 v12"></path>
+		</g>
+		<!-- 缓慢旋转 -->
+		<animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="120s" repeatCount="indefinite"/>
+	</svg>
+
+	<!-- 左上：令咒纹样（三道命令咒印） -->
+	<svg class="absolute -top-8 -left-12 h-72 w-72 rotate-12 opacity-[0.14]" viewBox="0 0 200 200" fill="none" stroke="#a61e2b" stroke-width="2" stroke-linecap="round">
+		<path d="M100 30 C85 55 85 75 100 95 C115 75 115 55 100 30 Z"></path>
+		<path d="M55 70 C60 95 72 110 92 115 C90 92 82 78 55 70 Z"></path>
+		<path d="M145 70 C140 95 128 110 108 115 C110 92 118 78 145 70 Z"></path>
+		<path d="M60 130 C70 148 85 158 100 160 C115 158 130 148 140 130" opacity="0.6"></path>
+		<circle cx="100" cy="100" r="3" fill="#a61e2b" stroke="none"></circle>
+	</svg>
+
+	<!-- 右上：齿轮剑纹 -->
+	<svg class="absolute top-20 right-24 h-40 w-40 -rotate-45 opacity-[0.1]" viewBox="0 0 100 100" fill="none" stroke="#d4af37" stroke-width="1.4">
+		<path d="M50 5 L56 20 L44 20 Z" fill="#d4af37" stroke="none"></path>
+		<path d="M50 20 L58 88 L50 96 L42 88 Z" fill="rgba(212,175,55,0.3)" stroke="#d4af37"></path>
+		<path d="M30 40 L70 40 M35 55 L65 55" stroke-width="2"></path>
+	</svg>
+
+	<!-- 漂浮的魔力粒子（金/红双色，缓慢闪烁） -->
+	<svg class="absolute inset-0 h-full w-full opacity-60" viewBox="0 0 100 100" preserveAspectRatio="none">
+		<circle cx="12%" cy="22%" r="0.3" fill="#d4af37"><animate attributeName="opacity" values="0.9;0.1;0.9" dur="5s" repeatCount="indefinite"/></circle>
+		<circle cx="28%" cy="10%" r="0.22" fill="#e8c96a"><animate attributeName="opacity" values="0.2;0.8;0.2" dur="4s" repeatCount="indefinite"/></circle>
+		<circle cx="70%" cy="15%" r="0.28" fill="#a61e2b"><animate attributeName="opacity" values="0.7;0.15;0.7" dur="6s" repeatCount="indefinite"/></circle>
+		<circle cx="88%" cy="42%" r="0.24" fill="#d4af37"><animate attributeName="opacity" values="0.3;0.9;0.3" dur="4.5s" repeatCount="indefinite"/></circle>
+		<circle cx="18%" cy="58%" r="0.26" fill="#e8c96a"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="5.5s" repeatCount="indefinite"/></circle>
+		<circle cx="55%" cy="8%" r="0.2" fill="#d4af37"><animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.6s" repeatCount="indefinite"/></circle>
+		<circle cx="80%" cy="85%" r="0.3" fill="#a61e2b"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="4.8s" repeatCount="indefinite"/></circle>
+		<circle cx="35%" cy="85%" r="0.24" fill="#d4af37"><animate attributeName="opacity" values="0.8;0.25;0.8" dur="5.2s" repeatCount="indefinite"/></circle>
+		<circle cx="65%" cy="65%" r="0.2" fill="#e8c96a"><animate attributeName="opacity" values="0.3;0.8;0.3" dur="4.2s" repeatCount="indefinite"/></circle>
+	</svg>
+</div>

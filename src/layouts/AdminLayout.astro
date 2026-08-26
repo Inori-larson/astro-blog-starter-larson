@@ -1,5 +1,6 @@
 ---
 import { SITE_TITLE } from '../../consts';
+import WorldDecor from '../components/WorldDecor.astro';
 
 interface Props {
 	title: string;
@@ -30,9 +31,10 @@ const { title } = Astro.props;
 		</style>
 	</head>
 	<body class="bg-zinc-50 font-sans antialiased dark:bg-zinc-950">
-		<div class="flex min-h-screen">
+		<WorldDecor />
+		<div class="relative z-10 flex min-h-screen">
 			<!-- 侧边栏 -->
-			<aside class="fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-200/70 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+			<aside class="fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-200/70 bg-white/90 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/90">
 				<a href="/admin/" class="flex h-16 items-center gap-2.5 border-b border-zinc-200/70 px-5 dark:border-zinc-800">
 					<span
 						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
