@@ -1,72 +1,45 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import { render } from 'astro:content';
-import { readingTimeMinutes } from '../../lib/utils';
+import { getDb } from '../../lib/db';
+import { cached } from '../../lib/cache';
+import { getPostBySlug, getNeighbors, getRelated } from '../../lib/posts';
 
-export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	const sorted = posts.sort(
-		(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-	);
-	return sorted.map((post, i) => ({
-		params: { slug: post.id },
-		props: {
-			post,
-			prev: sorted[i + 1]
-				? { title: sorted[i + 1].data.title, href: `/blog/${sorted[i + 1].id}/` }
-				: undefined,
-			next: sorted[i - 1]
-				? { title: sorted[i - 1].data.title, href: `/blog/${sorted[i - 1].id}/` }
-				: undefined,
-		},
-	}));
-}
+export const prerender = false;
 
-interface Props {
-	post: CollectionEntry<'blog'>;
-	prev?: { title: string; href: string };
-	next?: { title: string; href: string };
-}
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect('/blog/');
 
-const { post, prev, next } = Astro.props;
-const { Content, headings } = await render(post);
-const minutes = readingTimeMinutes(post.body ?? '');
+const db = getDb(Astro);
+const post = await cached(Astro, `post:${slug}`, 300, () => getPostBySlug(db, slug));
+if (!post) return Astro.redirect('/404');
 
-// 相关文章：按共享标签数排序，同分则取更新的
-const allPosts = await getCollection('blog');
-const related = allPosts
-	.filter((p) => p.id !== post.id)
-	.map((p) => ({
-		post: p,
-		score: p.data.tags.filter((t) => post.data.tags.includes(t)).length,
-	}))
-	.sort(
-		(a, b) =>
-			b.score - a.score ||
-			b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf(),
-	)
-	.slice(0, 3)
-	.map(({ post: p }) => ({
-		title: p.data.title,
-		href: `/blog/${p.id}/`,
-		readingTime: readingTimeMinutes(p.body ?? ''),
-	}));
+const [{ prev, next }, related] = await Promise.all([
+	getNeighbors(db, post.publishedAt),
+	getRelated(db, post.id, post.tags),
+]);
+
+const headings = post.contentHtml
+	? [...post.contentHtml.matchAll(/<h([2-3]) id="([^"]*)"[^>]*>([\s\S]*?)<\/h\1>/g)].map((m) => ({
+			depth: Number(m[1]),
+			slug: m[2],
+			text: m[3].replace(/<[^>]+>/g, '').trim(),
+		}))
+	: [];
 ---
 
 <BlogPost
-	title={post.data.title}
-	description={post.data.description}
-	pubDate={post.data.pubDate}
-	updatedDate={post.data.updatedDate}
-	heroImage={post.data.heroImage}
-	tags={post.data.tags}
+	title={post.title}
+	description={post.description}
+	pubDate={post.publishedAt}
+	updatedDate={post.updatedAt ?? undefined}
+	heroImage={post.heroImage ?? undefined}
+	tags={post.tags}
 	headings={headings}
-	readingTime={minutes}
-	slug={post.id}
+	readingTime={post.readingMinutes}
+	slug={post.slug}
 	{prev}
 	{next}
 	{related}
 >
-	<Content />
+	<Fragment set:html={post.contentHtml} />
 </BlogPost>

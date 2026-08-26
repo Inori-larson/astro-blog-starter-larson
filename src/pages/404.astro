@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE_TITLE } from '../consts';
+
+export const prerender = true;
 ---
 
 <BaseLayout title={`页面不存在 · ${SITE_TITLE}`} description="404 - 页面不存在">

@@ -1,6 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE_TITLE } from '../consts';
+
+export const prerender = true;
 ---
 
 <BaseLayout title={`搜索 · ${SITE_TITLE}`} description="搜索全站文章">

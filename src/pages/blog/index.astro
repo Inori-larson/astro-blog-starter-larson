@@ -2,13 +2,14 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import { getCollection } from 'astro:content';
-import { readingTimeMinutes } from '../../lib/utils';
+import { getDb } from '../../lib/db';
+import { cached } from '../../lib/cache';
+import { listPosts, listTagCounts } from '../../lib/posts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+const db = getDb(Astro);
+const posts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
+const tagCountsList = await cached(Astro, 'tags:counts', 300, () => listTagCounts(db));
+const allTags = tagCountsList.map((t) => t.name);
 ---
 
 <BaseLayout title={`博客 · ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
@@ -52,16 +53,16 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 		<div id="post-grid" class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 			{
 				posts.map((post, i) => (
-					<div class="reveal" data-tags={post.data.tags.join(',')} style={`transition-delay:${Math.min(i, 5) * 60}ms`}>
+					<div class="reveal" data-tags={post.tags.join(',')} style={`transition-delay:${Math.min(i, 5) * 60}ms`}>
 						<PostCard
-							title={post.data.title}
-							description={post.data.description}
-							pubDate={post.data.pubDate}
-							heroImage={post.data.heroImage}
-							tags={post.data.tags}
-							href={`/blog/${post.id}/`}
-							readingTime={readingTimeMinutes(post.body ?? '')}
-							slug={post.id}
+							title={post.title}
+							description={post.description}
+							pubDate={post.publishedAt}
+							heroImage={post.heroImage ?? undefined}
+							tags={post.tags}
+							href={`/blog/${post.slug}/`}
+							readingTime={post.readingMinutes}
+							slug={post.slug}
 						/>
 					</div>
 				))

@@ -4,19 +4,17 @@ import PostCard from '../components/PostCard.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import { SITE_TITLE, SITE_DESCRIPTION, AUTHOR_NAME } from '../consts';
 import { projects } from '../data/projects';
-import { getCollection } from 'astro:content';
-import { readingTimeMinutes } from '../lib/utils';
+import { getDb } from '../lib/db';
+import { cached } from '../lib/cache';
+import { listPosts, listTagCounts } from '../lib/posts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const db = getDb(Astro);
+const posts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
+const tagCountsList = await cached(Astro, 'tags:counts', 300, () => listTagCounts(db));
+const allTags = tagCountsList.map((t) => t.name);
+const tagCounts = new Map(tagCountsList.map((t) => [t.name, t.count]));
 const [featured, ...rest] = posts;
-const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
 const featuredProjects = projects.filter((p) => p.featured);
-const tagCounts = new Map<string, number>();
-for (const p of posts) {
-	for (const t of p.data.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
-}
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
@@ -136,14 +134,14 @@ for (const p of posts) {
 				</div>
 				<div class="reveal mt-5">
 					<PostCard
-						title={featured.data.title}
-						description={featured.data.description}
-						pubDate={featured.data.pubDate}
-						heroImage={featured.data.heroImage}
-						tags={featured.data.tags}
-						href={`/blog/${featured.id}/`}
-						readingTime={readingTimeMinutes(featured.body ?? '')}
-						slug={featured.id}
+						title={featured.title}
+						description={featured.description}
+						pubDate={featured.publishedAt}
+						heroImage={featured.heroImage ?? undefined}
+						tags={featured.tags}
+						href={`/blog/${featured.slug}/`}
+						readingTime={featured.readingMinutes}
+						slug={featured.slug}
 						featured
 					/>
 				</div>
@@ -157,17 +155,17 @@ for (const p of posts) {
 			<section class="mx-auto mt-14 max-w-6xl px-4 sm:px-6">
 				<h2 class="reveal text-xl font-bold text-zinc-900 sm:text-2xl dark:text-white">更多文章</h2>
 				<div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-					{rest.map((post, i) => (
+					{					rest.map((post, i) => (
 						<div class="reveal" style={`transition-delay:${Math.min(i, 5) * 60}ms`}>
 							<PostCard
-								title={post.data.title}
-								description={post.data.description}
-								pubDate={post.data.pubDate}
-								heroImage={post.data.heroImage}
-								tags={post.data.tags}
-								href={`/blog/${post.id}/`}
-								readingTime={readingTimeMinutes(post.body ?? '')}
-								slug={post.id}
+								title={post.title}
+								description={post.description}
+								pubDate={post.publishedAt}
+								heroImage={post.heroImage ?? undefined}
+								tags={post.tags}
+								href={`/blog/${post.slug}/`}
+								readingTime={post.readingMinutes}
+								slug={post.slug}
 							/>
 						</div>
 					))}

@@ -1,30 +1,29 @@
-import { getCollection } from 'astro:content';
+import { getDb } from '../lib/db';
+import { cached } from '../lib/cache';
+import { listSearchDocs } from '../lib/posts';
+import { stripMarkdown } from '../lib/markdown';
 
-/** 去除 Markdown 语法噪音，仅保留可搜索的纯文本 */
-function stripMarkdown(md: string): string {
-	return md
-		.replace(/```[\s\S]*?```/g, ' ')
-		.replace(/`([^`]*)`/g, '$1')
-		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
-		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-		.replace(/<\/?[a-z][^>]*>/gi, ' ')
-		.replace(/[#>*_~|-]+/g, ' ')
-		.replace(/\s+/g, ' ')
-		.trim();
-}
+export const prerender = false;
 
-export async function GET() {
-	const posts = await getCollection('blog');
-	const docs = posts.map((p) => ({
-		slug: p.id,
-		url: `/blog/${p.id}/`,
-		title: p.data.title,
-		description: p.data.description,
-		tags: p.data.tags,
-		date: p.data.pubDate.toISOString(),
-		body: stripMarkdown(p.body ?? '').slice(0, 8000),
-	}));
+export async function GET(context: { locals: App.Locals; site: URL | undefined }) {
+	const db = getDb(context);
+	const docs = await cached(context, 'search:index', 300, async () => {
+		const rows = await listSearchDocs(db);
+		return rows.map((r) => ({
+			slug: r.slug,
+			url: `/blog/${r.slug}/`,
+			title: r.title,
+			description: r.description,
+			tags: r.tags,
+			date: r.publishedAt.toISOString(),
+			body: stripMarkdown(r.contentMd).slice(0, 8000),
+		}));
+	});
+
 	return new Response(JSON.stringify(docs), {
-		headers: { 'Content-Type': 'application/json; charset=utf-8' },
+		headers: {
+			'Content-Type': 'application/json; charset=utf-8',
+			'Cache-Control': 'public, max-age=300',
+		},
 	});
 }

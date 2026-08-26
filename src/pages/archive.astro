@@ -1,24 +1,24 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCollection } from 'astro:content';
-import { readingTimeMinutes } from '../lib/utils';
+import { getDb } from '../lib/db';
+import { cached } from '../lib/cache';
+import { listPosts } from '../lib/posts';
 import { SITE_TITLE } from '../consts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const db = getDb(Astro);
+const posts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
 
 const byYear = new Map<number, typeof posts>();
 for (const p of posts) {
-	const year = p.data.pubDate.getFullYear();
+	const year = p.publishedAt.getFullYear();
 	if (!byYear.has(year)) byYear.set(year, []);
 	byYear.get(year)!.push(p);
 }
 const years = [...byYear.keys()].sort((a, b) => b - a);
+const currentYear = new Date().getFullYear();
 
 const fmt = (d: Date) =>
 	`${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-const currentYear = new Date().getFullYear();
 ---
 
 <BaseLayout title={`归档 · ${SITE_TITLE}`} description="全部文章按时间归档">
@@ -54,17 +54,17 @@ const currentYear = new Date().getFullYear();
 							{byYear.get(year)!.map((p) => (
 								<li>
 									<a
-										href={`/blog/${p.id}/`}
+										href={`/blog/${p.slug}/`}
 										class="group flex items-center gap-4 rounded-xl px-3 py-2.5 transition-colors hover:bg-white dark:hover:bg-zinc-900"
 									>
 										<time class="w-14 shrink-0 font-mono text-xs text-zinc-400 transition-colors group-hover:text-brand-500 dark:text-zinc-500 dark:group-hover:text-brand-400">
-											{fmt(p.data.pubDate)}
+											{fmt(p.publishedAt)}
 										</time>
 										<span class="flex-1 truncate font-medium text-zinc-700 transition-colors group-hover:text-brand-600 dark:text-zinc-300 dark:group-hover:text-brand-400">
-											{p.data.title}
+											{p.title}
 										</span>
 										<span class="hidden shrink-0 text-xs text-zinc-400 sm:block dark:text-zinc-600">
-											{readingTimeMinutes(p.body ?? '')} 分钟
+											{p.readingMinutes} 分钟
 										</span>
 										<svg
 											xmlns="http://www.w3.org/2000/svg"

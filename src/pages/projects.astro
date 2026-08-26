@@ -4,6 +4,8 @@ import StatusBadge from '../components/StatusBadge.astro';
 import { projects } from '../data/projects';
 import { SITE_TITLE } from '../consts';
 
+export const prerender = true;
+
 const featured = projects.filter((p) => p.featured);
 const rest = projects.filter((p) => !p.featured);
 ---

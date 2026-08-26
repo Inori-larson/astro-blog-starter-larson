@@ -16,13 +16,15 @@ MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以[把
 
 ## 一个实际的例子
 
-下面就是一个直接嵌在文章里的组件——是的，它是可以点击的：
+在 MDX 里嵌入组件大概长这样——写的时候是代码，渲染出来就是真正可以点击的元素：
 
+```mdx
 import HeaderLink from "../../components/HeaderLink.astro";
 
 <HeaderLink href="#" onclick="alert('clicked!')">
 	文章里嵌入的组件
 </HeaderLink>
+```
 
 如果我只想"说明"这个按钮的行为，贴张图就够了；但既然可以让你亲手点一下，为什么不呢？
 

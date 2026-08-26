@@ -13,16 +13,22 @@
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "12.6.12",
-		"@astrojs/mdx": "4.3.13",
 		"@astrojs/rss": "4.0.14",
 		"@astrojs/sitemap": "3.6.1",
 		"@tailwindcss/typography": "^0.5.20",
 		"@tailwindcss/vite": "^4.3.3",
 		"astro": "5.16.9",
+		"drizzle-orm": "^0.45.2",
+		"github-slugger": "^2.0.0",
+		"markdown-it": "^15.0.0",
+		"markdown-it-anchor": "^9.2.1",
+		"shiki": "^4.4.3",
 		"tailwindcss": "^4.3.3",
 		"typescript": "5.9.3"
 	},
 	"devDependencies": {
+		"drizzle-kit": "^0.31.10",
+		"gray-matter": "^4.0.3",
 		"wrangler": "4.88.0"
 	},
 	"engines": {
@@ -36,7 +42,12 @@
 		"check": "astro build && tsc && wrangler deploy --dry-run",
 		"deploy": "wrangler deploy",
 		"dev": "astro dev",
-		"preview": "astro build && wrangler dev"
+		"preview": "astro build && wrangler dev",
+		"db:generate": "drizzle-kit generate",
+		"db:apply": "node scripts/db-apply.mjs",
+		"db:apply:remote": "node scripts/db-apply.mjs --remote",
+		"db:seed": "node scripts/import-seed.mjs && npx wrangler d1 execute larson-blog-db --local --file drizzle/seed.sql",
+		"db:seed:remote": "node scripts/import-seed.mjs && npx wrangler d1 execute larson-blog-db --remote --file drizzle/seed.sql"
 	},
 	"type": "module"
 }
