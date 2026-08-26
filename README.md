@@ -24,6 +24,8 @@ Cloudflare Workers（Astro SSR，output: server）
 - `Ctrl + K` 全局搜索弹窗（服务端 JSON 索引，客户端打分）
 - 文章页：目录 TOC（桌面粘性 + 移动端折叠）、阅读进度条、代码高亮 + 一键复制、相关推荐、上下篇、分享栏
 - 卡片 → 文章页头图共享元素过渡动画
+- **互动**：点赞（访客指纹去重）、浏览量（按天聚合 + 双重去重）、评论（楼中楼回复 + 限流防刷）
+- **后台管理 `/admin`**：邮箱密码登录（JWT 会话 + PBKDF2 哈希）、仪表盘（统计/趋势/热门文章）、在线 Markdown 编辑器（实时预览/草稿/标签）、评论审核
 - RSS 订阅 + Sitemap
 - 数据库迁移（Drizzle Kit）+ 种子导入脚本
 
@@ -50,6 +52,15 @@ npm run deploy              # 部署到 Cloudflare Workers
 | `npm run db:apply:remote` | 应用迁移到远程 D1 |
 | `npm run db:seed` | 重新导入 `scripts/seed-content/` 下的文章（本地） |
 | `npm run db:seed:remote` | 同上（远程） |
+| `node scripts/create-admin.mjs` | 创建/重置管理员（生成 SQL，按提示应用） |
+
+## 后台管理
+
+访问 `/admin` 进入后台（默认重定向到登录页）：
+
+1. **初始化管理员**：`node scripts/create-admin.mjs your@email.com yourpassword`，然后按提示执行两条 wrangler 命令（本地 + 远程）
+2. **设置会话密钥**：本地复制 `.dev.vars.example` 为 `.dev.vars`；远程执行 `npx wrangler secret put AUTH_SECRET`（≥32 字符随机串）
+3. 功能：仪表盘（浏览趋势/热门文章）、写文章（Markdown 编辑器 + 实时预览 + 草稿）、评论审核
 
 ## 写作
 
@@ -74,9 +85,10 @@ scripts/          # seed-content 文章源 + 导入/迁移脚本
 
 - [x] 第 0 期：UI 基建（Tailwind 4 / 暗色模式 / 动效）
 - [x] 第 0.5 期：页面扩展（归档/标签/项目/友链/搜索）
-- [x] 第 1 期：D1 数据库 + Drizzle 数据层（本期）
-- [ ] 第 2 期：互动功能（评论 / 点赞 / 浏览量 / Turnstile）
-- [ ] 第 3 期：后台管理（登录 / 在线写作 / R2 媒体库）
+- [x] 第 1 期：D1 数据库 + Drizzle 数据层
+- [x] 第 2 期：互动功能（评论 / 点赞 / 浏览量 / Turnstile）
+- [x] 第 3 期：后台管理（登录 / 在线写作 / 评论审核）
+- [ ] 第 4 期：订阅与通知（Resend 邮件）+ R2 媒体库
 - [ ] 第 4 期：订阅与通知（Resend 邮件）
 
 ## 致谢
