@@ -1,0 +1,127 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+---
+
+<AdminLayout title="文章管理">
+	<div class="mx-auto max-w-5xl">
+		<div class="flex items-center justify-between">
+			<h1 class="text-2xl font-bold text-zinc-900 dark:text-white">文章管理</h1>
+			<a
+				href="/admin/posts/new"
+				class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-500/25 transition-all hover:-translate-y-0.5"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-4 w-4"
+					aria-hidden="true"
+				>
+					<path d="M12 5v14M5 12h14"></path>
+				</svg>
+				写新文章
+			</a>
+		</div>
+
+		<div
+			class="mt-6 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+		>
+			<table class="w-full text-sm">
+				<thead>
+					<tr class="border-b border-zinc-100 text-left text-xs text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+						<th class="px-5 py-3 font-medium">标题</th>
+						<th class="px-3 py-3 font-medium">状态</th>
+						<th class="px-3 py-3 font-medium">发布时间</th>
+						<th class="px-3 py-3 font-medium">阅读</th>
+						<th class="px-5 py-3 text-right font-medium">操作</th>
+					</tr>
+				</thead>
+				<tbody id="post-rows">
+					<tr>
+						<td colspan="5" class="px-5 py-10 text-center text-zinc-400 dark:text-zinc-600">加载中…</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+		const esc = (s: string) =>
+			s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+
+		const fmtDate = (v: string | number) => {
+			const d = new Date(v);
+			return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+		};
+
+		async function load() {
+			const tbody = document.getElementById('post-rows')!;
+			try {
+				const res = await fetch('/api/admin/posts');
+				if (res.status === 401) {
+					window.location.href = '/admin/login';
+					return;
+				}
+				const data = await res.json();
+				const items = (data.items ?? []) as {
+					id: number;
+					slug: string;
+					title: string;
+					status: string;
+					publishedAt: string;
+					readingMinutes: number;
+				}[];
+				tbody.innerHTML = '';
+				if (!items.length) {
+					tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-10 text-center text-zinc-400">还没有文章，点击右上角开始写作</td></tr>';
+					return;
+				}
+				for (const p of items) {
+					const tr = document.createElement('tr');
+					tr.className = 'border-b border-zinc-50 transition-colors last:border-0 hover:bg-zinc-50/80 dark:border-zinc-800/50 dark:hover:bg-zinc-800/40';
+					tr.innerHTML = `
+						<td class="px-5 py-3.5">
+							<a href="/admin/posts/${p.id}" class="font-medium text-zinc-800 transition-colors hover:text-brand-600 dark:text-zinc-200 dark:hover:text-brand-400">${esc(p.title)}</a>
+							<span class="ml-2 font-mono text-xs text-zinc-400 dark:text-zinc-600">${esc(p.slug)}</span>
+						</td>
+						<td class="px-3 py-3.5">
+							<span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+								p.status === 'published'
+									? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+									: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+							}">${p.status === 'published' ? '已发布' : '草稿'}</span>
+						</td>
+						<td class="px-3 py-3.5 text-xs text-zinc-400 dark:text-zinc-500">${fmtDate(p.publishedAt)}</td>
+						<td class="px-3 py-3.5 text-xs text-zinc-400 dark:text-zinc-500">${p.readingMinutes} 分钟</td>
+						<td class="px-5 py-3.5 text-right">
+							<a href="/blog/${p.slug}/" target="_blank" class="text-xs font-medium text-zinc-400 transition-colors hover:text-brand-600 dark:hover:text-brand-400">查看</a>
+							<button data-del="${p.id}" class="ml-3 text-xs font-medium text-zinc-400 transition-colors hover:text-rose-500">删除</button>
+						</td>
+					`;
+					tbody.appendChild(tr);
+				}
+			} catch {
+				tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-10 text-center text-zinc-400">加载失败</td></tr>';
+			}
+		}
+
+		document.getElementById('post-rows')?.addEventListener('click', async (e) => {
+			const btn = (e.target as HTMLElement).closest('[data-del]') as HTMLButtonElement | null;
+			if (!btn) return;
+			if (!confirm('确定删除这篇文章？（前台将不再可见）')) return;
+			const res = await fetch(`/api/admin/posts/${btn.dataset.del}`, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+			});
+			if (res.ok) load();
+		});
+
+		load();
+	</script>
+</AdminLayout>

@@ -1,0 +1,145 @@
+---
+import { SITE_TITLE } from '../../consts';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+
+// 会话守卫
+const { getSessionFromRequest } = await import('../lib/auth');
+let session = null;
+try {
+	session = await getSessionFromRequest(Astro.locals.runtime.env, Astro.request);
+} catch {
+	// AUTH_SECRET 未配置时视为未登录
+}
+if (!session) return Astro.redirect('/admin/login');
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>{title} · 后台管理</title>
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<script is:inline>
+			(() => {
+				const stored = localStorage.getItem('theme');
+				const dark = stored
+					? stored === 'dark'
+					: window.matchMedia('(prefers-color-scheme: dark)').matches;
+				document.documentElement.classList.toggle('dark', dark);
+			})();
+		</script>
+		<style is:global>
+			@import '../styles/global.css';
+		</style>
+	</head>
+	<body class="bg-zinc-50 font-sans antialiased dark:bg-zinc-950">
+		<div class="flex min-h-screen">
+			<!-- 侧边栏 -->
+			<aside class="fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-200/70 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+				<a href="/admin/" class="flex h-16 items-center gap-2.5 border-b border-zinc-200/70 px-5 dark:border-zinc-800">
+					<span
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white"
+						aria-hidden="true">L</span
+					>
+					<span class="text-sm font-bold text-zinc-900 dark:text-white">后台管理</span>
+				</a>
+				<nav class="flex-1 space-y-0.5 px-3 py-4 text-sm" data-admin-nav>
+					{
+						[
+							{ href: '/admin/', label: '仪表盘', icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z' },
+							{ href: '/admin/posts', label: '文章管理', icon: 'M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5zM14 2v6h6M16 13H8M16 17H8M10 9H8' },
+							{ href: '/admin/comments', label: '评论审核', icon: 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z' },
+						].map((item) => (
+							<a
+								href={item.href}
+								class="flex items-center gap-2.5 rounded-lg px-3 py-2 font-medium transition-colors text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+									<path d={item.icon} />
+								</svg>
+								{item.label}
+							</a>
+						))
+					}
+				</nav>
+				<div class="border-t border-zinc-200/70 px-3 py-4 dark:border-zinc-800">
+					<a
+						href="/"
+						class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="h-4 w-4"
+							aria-hidden="true"
+						>
+							<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+							<path d="M9 22V12h6v10"></path>
+						</svg>
+						返回前台
+					</a>
+					<button
+						id="logout-btn"
+						type="button"
+						class="mt-0.5 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50 dark:hover:bg-rose-500/10"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							class="h-4 w-4"
+							aria-hidden="true"
+						>
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+							<polyline points="16 17 21 12 16 7"></polyline>
+							<line x1="21" x2="9" y1="12" y2="12"></line>
+						</svg>
+						退出登录
+					</button>
+				</div>
+			</aside>
+
+			<!-- 主内容 -->
+			<main class="ml-56 flex-1 p-6 lg:p-8">
+				<slot />
+			</main>
+		</div>
+
+		<script>
+			// 高亮当前导航
+			const nav = document.querySelector('[data-admin-nav]');
+			const path = window.location.pathname;
+			nav?.querySelectorAll('a').forEach((a) => {
+				const href = a.getAttribute('href') ?? '';
+				const active =
+					href === '/admin/'
+						? path === '/admin/' || path === '/admin'
+						: path.startsWith(href);
+				if (active) {
+					a.classList.add('bg-brand-50', 'text-brand-600', 'dark:bg-brand-500/10', 'dark:text-brand-400');
+				}
+			});
+
+			document.getElementById('logout-btn')?.addEventListener('click', async () => {
+				await fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+				window.location.href = '/admin/login';
+			});
+		</script>
+	</body>
+</html>

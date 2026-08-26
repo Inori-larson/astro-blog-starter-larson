@@ -1,0 +1,237 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+// 'new' 或空 → 新建模式；数字 → 编辑模式
+const isEdit = /^\d+$/.test(id ?? '');
+const postId = isEdit ? id : undefined;
+const title = isEdit ? '编辑文章' : '写新文章';
+---
+
+<AdminLayout {title}>
+	<div id="editor-root" class="mx-auto max-w-6xl" data-post-id={postId ?? ''}>
+		<div class="flex flex-wrap items-center justify-between gap-3">
+			<h1 class="text-2xl font-bold text-zinc-900 dark:text-white">{title}</h1>
+			<div class="flex items-center gap-2">
+				<a
+					href="/admin/posts"
+					class="rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+				>
+					返回列表
+				</a>
+				<button
+					type="button"
+					id="save-btn"
+					data-status="published"
+					class="rounded-xl bg-gradient-to-r from-brand-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-500/25 transition-all hover:-translate-y-0.5"
+				>
+					发布
+				</button>
+				<button
+					type="button"
+					id="save-draft-btn"
+					data-status="draft"
+					class="rounded-xl border border-zinc-300 px-4 py-2.5 text-sm font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+				>
+					存草稿
+				</button>
+			</div>
+		</div>
+
+		<div class="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+			<!-- 编辑区 -->
+			<div class="space-y-4">
+				<input
+					id="f-title"
+					type="text"
+					placeholder="文章标题…"
+					class="w-full rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-lg font-bold text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-brand-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:focus:border-brand-500"
+				/>
+				<textarea
+					id="f-content"
+					rows="18"
+					placeholder="用 Markdown 开始写作…&#10;&#10;## 二级标题&#10;&#10;正文内容，支持 **粗体**、*斜体*、`行内代码`、[链接](https://example.com) 和代码块。"
+					class="w-full resize-y rounded-2xl border border-zinc-200 bg-white px-5 py-4 font-mono text-sm leading-relaxed text-zinc-800 outline-none transition-colors placeholder:text-zinc-400 focus:border-brand-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:placeholder:text-zinc-600 dark:focus:border-brand-500"
+				></textarea>
+			</div>
+
+			<!-- 元数据 + 预览切换 -->
+			<div class="space-y-4">
+				<div class="rounded-2xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+					<h2 class="text-sm font-bold text-zinc-900 dark:text-white">设置</h2>
+					<label class="mt-4 block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-slug"
+						>Slug（URL，小写字母/数字/连字符）</label
+					>
+					<input
+						id="f-slug"
+						type="text"
+						placeholder="my-first-post（留空自动生成）"
+						class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 font-mono text-xs text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"
+					/>
+					<label class="mt-3 block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-desc">摘要</label>
+					<textarea
+						id="f-desc"
+						rows="3"
+						placeholder="一句话摘要（用于列表页与 SEO）"
+						class="mt-1.5 w-full resize-y rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"
+					></textarea>
+					<label class="mt-3 block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-hero">头图 URL</label>
+					<input
+						id="f-hero"
+						type="text"
+						placeholder="/blog-placeholder-1.jpg"
+						class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"
+					/>
+					<label class="mt-3 block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-tags">标签（逗号分隔）</label>
+					<input
+						id="f-tags"
+						type="text"
+						placeholder="技术, 随笔, Astro"
+						class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"
+					/>
+					<p id="save-msg" class="mt-3 hidden text-xs font-medium" aria-live="polite"></p>
+				</div>
+
+				<!-- 实时预览 -->
+				<div class="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+					<div class="border-b border-zinc-100 px-5 py-3 text-xs font-bold text-zinc-400 dark:border-zinc-800 dark:text-zinc-500">
+						实时预览
+					</div>
+					<div id="preview" class="preview prose prose-zinc dark:prose-invert max-h-96 overflow-y-auto p-5 text-sm"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const root = document.getElementById('editor-root')!;
+		const postId = root.dataset.postId;
+		const fields = {
+			title: document.getElementById('f-title') as HTMLInputElement,
+			slug: document.getElementById('f-slug') as HTMLInputElement,
+			desc: document.getElementById('f-desc') as HTMLTextAreaElement,
+			hero: document.getElementById('f-hero') as HTMLInputElement,
+			tags: document.getElementById('f-tags') as HTMLInputElement,
+			content: document.getElementById('f-content') as HTMLTextAreaElement,
+		};
+		const preview = document.getElementById('preview')!;
+		const msg = document.getElementById('save-msg')!;
+		let saving = false;
+
+		// 编辑模式：加载已有内容
+		if (postId) {
+			void (async () => {
+				const res = await fetch(`/api/admin/posts/${postId}`);
+				if (res.status === 401) {
+					window.location.href = '/admin/login';
+					return;
+				}
+				const data = await res.json();
+				const post = data.post;
+				if (!post) return;
+				fields.title.value = post.title;
+				fields.slug.value = post.slug;
+				fields.desc.value = post.description ?? '';
+				fields.hero.value = post.heroImage ?? '';
+				fields.tags.value = (post.tags ?? []).join(', ');
+				fields.content.value = post.contentMd ?? '';
+				renderPreview();
+			})();
+		}
+
+		// 实时预览（简易渲染：不请求服务器，粗略样式即可）
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		function renderPreview() {
+			const md = fields.content.value;
+			// 极简预览：标题/粗体/斜体/代码/引用/列表/段落
+			const html = md
+				.split(/\n{2,}/)
+				.map((block) => {
+					const t = block.trim();
+					if (!t) return '';
+					if (t.startsWith('```')) return `<pre><code>${t.replace(/```\w*\n?/g, '')}</code></pre>`;
+					const inline = (s: string) =>
+						s
+							.replaceAll('&', '&amp;')
+							.replaceAll('<', '&lt;')
+							.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+							.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+							.replace(/`([^`]+)`/g, '<code>$1</code>')
+							.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+					const lines = t.split('\n');
+					if (t.startsWith('#')) {
+						const level = Math.min(6, (t.match(/^#+/) ?? ['#'])[0]!.length);
+						return `<h${level}>${inline(t.replace(/^#+\s*/, ''))}</h${level}>`;
+					}
+					if (t.startsWith('> ')) return `<blockquote>${inline(t.replace(/^> ?/gm, ''))}</blockquote>`;
+					if (lines.every((l) => /^[-*] /.test(l))) {
+						return `<ul>${lines.map((l) => `<li>${inline(l.slice(2))}</li>`).join('')}</ul>`;
+					}
+					if (lines.every((l) => /^\d+\. /.test(l))) {
+						return `<ol>${lines.map((l) => `<li>${inline(l.replace(/^\d+\.\s*/, ''))}</li>`).join('')}</ol>`;
+					}
+					return `<p>${inline(t).replaceAll('\n', '<br>')}</p>`;
+				})
+				.join('');
+			preview.innerHTML = html || '<p class="text-zinc-400">开始输入后此处显示预览…</p>';
+		}
+		fields.content.addEventListener('input', () => {
+			clearTimeout(timer);
+			timer = setTimeout(renderPreview, 300);
+		});
+
+		function showMsg(text: string, ok: boolean) {
+			msg.textContent = text;
+			msg.className = `mt-3 text-xs font-medium ${ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+		}
+
+		async function save(status: 'draft' | 'published') {
+			if (saving) return;
+			if (!fields.title.value.trim() || !fields.content.value.trim()) {
+				showMsg('标题和内容不能为空', false);
+				return;
+			}
+			saving = true;
+			const body = {
+				title: fields.title.value.trim(),
+				slug: fields.slug.value.trim() || undefined,
+				description: fields.desc.value.trim(),
+				heroImage: fields.hero.value.trim(),
+				tags: fields.tags.value
+					.split(/[,，]/)
+					.map((t) => t.trim())
+					.filter(Boolean),
+				contentMd: fields.content.value,
+				status,
+			};
+			try {
+				const res = await fetch(postId ? `/api/admin/posts/${postId}` : '/api/admin/posts', {
+					method: postId ? 'PUT' : 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(body),
+				});
+				const data = await res.json();
+				if (!res.ok) {
+					showMsg(String(data.error ?? '保存失败'), false);
+					return;
+				}
+				showMsg(status === 'draft' ? '草稿已保存' : '发布成功！', true);
+				if (!postId && data.id) {
+					// 新建后切到编辑模式（刷新 URL）
+					window.location.href = `/admin/posts/${data.id}`;
+					return;
+				}
+				setTimeout(() => msg.classList.add('hidden'), 3000);
+			} catch {
+				showMsg('网络错误，请稍后再试', false);
+			} finally {
+				saving = false;
+			}
+		}
+
+		document.getElementById('save-btn')?.addEventListener('click', () => save('published'));
+		document.getElementById('save-draft-btn')?.addEventListener('click', () => save('draft'));
+	</script>
+</AdminLayout>
