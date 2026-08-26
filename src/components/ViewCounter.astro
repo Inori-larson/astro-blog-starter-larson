@@ -1,0 +1,64 @@
+---
+interface Props {
+	slug: string;
+	initial?: number;
+}
+
+const { slug, initial = 0 } = Astro.props;
+---
+
+<span
+	id="view-counter"
+	data-slug={slug}
+	data-initial={initial}
+	class="inline-flex items-center gap-1.5 text-sm text-zinc-400 dark:text-zinc-500"
+>
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		class="h-4 w-4"
+		aria-hidden="true"
+	>
+		<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+		<circle cx="12" cy="12" r="3"></circle>
+	</svg>
+	<span id="view-count">{initial > 0 ? `${initial} 次浏览` : '…'}</span>
+</span>
+
+<script>
+	const initView = () => {
+		const root = document.getElementById('view-counter');
+		const countEl = document.getElementById('view-count');
+		if (!root || !countEl) return;
+		// 会话级去重：同一篇文章每会话只上报一次
+		const slug = root.dataset.slug!;
+		const key = `viewed:${slug}`;
+		try {
+			if (sessionStorage.getItem(key)) {
+				const initial = Number(root.dataset.initial ?? 0);
+				if (initial > 0) countEl.textContent = `${initial} 次浏览`;
+				else countEl.textContent = '';
+				return;
+			}
+			sessionStorage.setItem(key, '1');
+		} catch {
+			/* 隐私模式下忽略 */
+		}
+		void (async () => {
+			try {
+				const res = await fetch(`/api/posts/${slug}/view`, { method: 'POST' });
+				if (!res.ok) return;
+				const data = (await res.json()) as { total: number };
+				countEl.textContent = `${data.total} 次浏览`;
+			} catch {
+				countEl.textContent = '';
+			}
+		})();
+	};
+	document.addEventListener('astro:page-load', initView);
+</script>

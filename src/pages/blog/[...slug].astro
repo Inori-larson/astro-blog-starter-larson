@@ -3,6 +3,8 @@ import BlogPost from '../../layouts/BlogPost.astro';
 import { getDb } from '../../lib/db';
 import { cached } from '../../lib/cache';
 import { getPostBySlug, getNeighbors, getRelated } from '../../lib/posts';
+import { getLikeState, getTotalViews } from '../../lib/interactions';
+import { visitorHash } from '../../lib/visitor';
 
 export const prerender = false;
 
@@ -13,10 +15,13 @@ const db = getDb(Astro);
 const post = await cached(Astro, `post:${slug}`, 300, () => getPostBySlug(db, slug));
 if (!post) return Astro.redirect('/404');
 
-const [{ prev, next }, related] = await Promise.all([
+const [neighborInfo, related, likeState, viewCount] = await Promise.all([
 	getNeighbors(db, post.publishedAt),
 	getRelated(db, post.id, post.tags),
+	getLikeState(db, post.id, await visitorHash(Astro.request)),
+	getTotalViews(db, post.id),
 ]);
+const { prev, next } = neighborInfo;
 
 const headings = post.contentHtml
 	? [...post.contentHtml.matchAll(/<h([2-3]) id="([^"]*)"[^>]*>([\s\S]*?)<\/h\1>/g)].map((m) => ({
@@ -37,6 +42,9 @@ const headings = post.contentHtml
 	headings={headings}
 	readingTime={post.readingMinutes}
 	slug={post.slug}
+	likeCount={likeState.count}
+	liked={likeState.liked}
+	viewCount={viewCount}
 	{prev}
 	{next}
 	{related}

@@ -3,6 +3,9 @@ import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import TOC from '../components/TOC.astro';
 import ReadingProgress from '../components/ReadingProgress.astro';
+import LikeButton from '../components/LikeButton.astro';
+import ViewCounter from '../components/ViewCounter.astro';
+import Comments from '../components/Comments.astro';
 import { SITE_TITLE } from '../consts';
 
 interface Heading {
@@ -31,9 +34,13 @@ interface Props {
 	related?: RelatedPost[];
 	/** 文章 slug，用于共享元素过渡命名 */
 	slug?: string;
+	/** 互动初始数据（SSR 预取） */
+	likeCount?: number;
+	liked?: boolean;
+	viewCount?: number;
 }
 
-const { title, description, pubDate, updatedDate, heroImage, tags = [], headings = [], readingTime, prev, next, related, slug } =
+const { title, description, pubDate, updatedDate, heroImage, tags = [], headings = [], readingTime, prev, next, related, slug, likeCount = 0, liked = false, viewCount = 0 } =
 	Astro.props;
 
 const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
@@ -240,6 +247,18 @@ const weiboShare = `https://service.weibo.com/share/share.php?url=${encodeURICom
 				</a>
 			</div>
 		</div>
+
+		<!-- 互动栏：浏览量 + 点赞 -->
+		<div class="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-4">
+			<div class="flex flex-wrap items-center justify-center gap-4">
+				<ViewCounter slug={slug ?? ''} initial={viewCount} />
+				<span class="h-4 w-px bg-zinc-200 dark:bg-zinc-800" aria-hidden="true"></span>
+				<LikeButton slug={slug ?? ''} initialCount={likeCount} initialLiked={liked} />
+			</div>
+		</div>
+
+		<!-- 评论区 -->
+		{slug && <Comments slug={slug} />}
 
 		<!-- 相关文章 -->
 		{

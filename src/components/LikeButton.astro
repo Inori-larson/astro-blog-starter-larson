@@ -1,0 +1,97 @@
+---
+interface Props {
+	slug: string;
+	initialCount?: number;
+	initialLiked?: boolean;
+}
+
+const { slug, initialCount = 0, initialLiked = false } = Astro.props;
+---
+
+<div
+	id="like-button"
+	data-slug={slug}
+	data-count={initialCount}
+	data-liked={String(initialLiked)}
+	class="inline-flex"
+>
+	<button
+		type="button"
+		id="like-btn"
+		aria-label="点赞这篇文章"
+		aria-pressed={String(initialLiked)}
+		class:list={[
+			'group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-all',
+			initialLiked
+				? 'border-rose-300 bg-rose-50 text-rose-600 dark:border-rose-500/50 dark:bg-rose-500/10 dark:text-rose-400'
+				: 'border-zinc-200 bg-white text-zinc-600 hover:border-rose-300 hover:text-rose-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-rose-500/50 dark:hover:text-rose-400',
+		]}
+	>
+		<svg
+			id="like-icon"
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill={initialLiked ? 'currentColor' : 'none'}
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			class="h-4 w-4 transition-transform duration-200 group-active:scale-125"
+			aria-hidden="true"
+		>
+			<path
+				d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+			></path>
+		</svg>
+		<span id="like-count">{initialCount > 0 ? initialCount : '点赞'}</span>
+	</button>
+</div>
+
+<script>
+	const initLike = () => {
+		const root = document.getElementById('like-button');
+		const btn = document.getElementById('like-btn') as HTMLButtonElement | null;
+		const countEl = document.getElementById('like-count');
+		const icon = document.getElementById('like-icon');
+		if (!root || !btn || !countEl || !icon) return;
+
+		let busy = false;
+		btn.addEventListener('click', async () => {
+			if (busy) return;
+			busy = true;
+			const slug = root.dataset.slug!;
+			try {
+				const res = await fetch(`/api/posts/${slug}/like`, { method: 'POST' });
+				if (res.status === 429) {
+					countEl.textContent = '太快啦';
+					setTimeout(() => (countEl.textContent = root.dataset.count || '点赞'), 1500);
+					return;
+				}
+				if (!res.ok) return;
+				const state = (await res.json()) as { count: number; liked: boolean };
+				root.dataset.count = String(state.count);
+				root.dataset.liked = String(state.liked);
+				btn.setAttribute('aria-pressed', String(state.liked));
+				countEl.textContent = state.count > 0 ? String(state.count) : '点赞';
+				icon.setAttribute('fill', state.liked ? 'currentColor' : 'none');
+				btn.classList.toggle('border-rose-300', state.liked);
+				btn.classList.toggle('bg-rose-50', state.liked);
+				btn.classList.toggle('text-rose-600', state.liked);
+				btn.classList.toggle('dark:border-rose-500/50', state.liked);
+				btn.classList.toggle('dark:bg-rose-500/10', state.liked);
+				btn.classList.toggle('dark:text-rose-400', state.liked);
+				btn.classList.toggle('border-zinc-200', !state.liked);
+				btn.classList.toggle('bg-white', !state.liked);
+				btn.classList.toggle('text-zinc-600', !state.liked);
+				btn.classList.toggle('dark:border-zinc-700', !state.liked);
+				btn.classList.toggle('dark:bg-zinc-900', !state.liked);
+				btn.classList.toggle('dark:text-zinc-300', !state.liked);
+			} catch {
+				/* 网络错误静默 */
+			} finally {
+				busy = false;
+			}
+		});
+	};
+	document.addEventListener('astro:page-load', initLike);
+</script>
