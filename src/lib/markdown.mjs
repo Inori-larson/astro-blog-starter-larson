@@ -7,7 +7,7 @@
 import MarkdownIt from 'markdown-it';
 import anchor from 'markdown-it-anchor';
 import GithubSlugger from 'github-slugger';
-import { createHighlighter, bundledLanguages } from 'shiki';
+import { createHighlighter, bundledLanguages, createJavaScriptRegexEngine } from 'shiki';
 
 const slugger = new GithubSlugger();
 
@@ -26,9 +26,11 @@ let highlighterPromise = null;
 
 async function getHighlighter() {
 	if (!highlighterPromise) {
+		// Workers 环境禁用 Wasm（oniguruma 引擎不可用），使用 JS 正则引擎
 		highlighterPromise = createHighlighter({
 			themes: ['github-light', 'github-dark'],
 			langs: ['text', 'markdown', 'html', 'javascript', 'typescript', 'css', 'json', 'bash', 'sh', 'yaml', 'sql', 'astro', 'diff'],
+			engine: createJavaScriptRegexEngine({ forgiving: true }),
 		});
 	}
 	return highlighterPromise;
