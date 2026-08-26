@@ -1,18 +1,17 @@
 ---
 import { SITE_TITLE, AUTHOR_NAME } from '../../consts';
+import { getSessionFromRequest } from '../../lib/auth';
+
+export const prerender = false;
 
 // 已登录则直接进后台
-const session = await getSession(Astro);
-if (session) return Astro.redirect('/admin/');
-
-async function getSession(astro: { locals: App.Locals; request: Request }) {
-	const { getSessionFromRequest } = await import('../../lib/auth');
-	try {
-		return await getSessionFromRequest(astro.locals.runtime.env, astro.request);
-	} catch {
-		return null;
-	}
+let session = null;
+try {
+	session = await getSessionFromRequest(Astro.locals.runtime.env, Astro.request);
+} catch {
+	// AUTH_SECRET 未配置时视为未登录
 }
+if (session) return Astro.redirect('/admin/');
 ---
 
 <!doctype html>

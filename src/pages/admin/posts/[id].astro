@@ -1,7 +1,11 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { requireAdminPage } from '../../../lib/auth';
 
 export const prerender = false;
+
+const redirect = await requireAdminPage(Astro.locals.runtime.env, Astro.request);
+if (redirect) return redirect;
 
 const { id } = Astro.params;
 // 'new' 或空 → 新建模式；数字 → 编辑模式

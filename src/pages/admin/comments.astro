@@ -1,7 +1,11 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { requireAdminPage } from '../../lib/auth';
 
 export const prerender = false;
+
+const redirect = await requireAdminPage(Astro.locals.runtime.env, Astro.request);
+if (redirect) return redirect;
 ---
 
 <AdminLayout title="评论审核">

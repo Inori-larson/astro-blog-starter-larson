@@ -6,16 +6,6 @@ interface Props {
 }
 
 const { title } = Astro.props;
-
-// 会话守卫
-const { getSessionFromRequest } = await import('../lib/auth');
-let session = null;
-try {
-	session = await getSessionFromRequest(Astro.locals.runtime.env, Astro.request);
-} catch {
-	// AUTH_SECRET 未配置时视为未登录
-}
-if (!session) return Astro.redirect('/admin/login');
 ---
 
 <!doctype html>

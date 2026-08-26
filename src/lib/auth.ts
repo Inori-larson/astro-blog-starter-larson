@@ -128,3 +128,21 @@ export async function requireAdmin(
 	}
 	return { session };
 }
+
+/**
+ * 页面守卫（后台 .astro 页面 frontmatter 中调用）：
+ * 未登录返回重定向 Response，页面需 `if (response) return response;`
+ */
+export async function requireAdminPage(
+	env: unknown,
+	request: Request,
+): Promise<Response | null> {
+	const session = await getSessionFromRequest(env as { AUTH_SECRET?: string }, request);
+	if (!session) {
+		return new Response(null, {
+			status: 302,
+			headers: { Location: new URL('/admin/login', request.url).toString() },
+		});
+	}
+	return null;
+}
