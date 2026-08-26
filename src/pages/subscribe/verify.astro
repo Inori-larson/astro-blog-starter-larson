@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_TITLE } from '../../consts';
+
+export const prerender = false;
+
+const state = Astro.url.searchParams.get('state');
+const ok = state === 'ok';
+const invalid = state === 'invalid';
+---
+
+<BaseLayout title={ok ? '订阅成功' : '订阅确认'} description="邮件订阅确认">
+	<section class="relative mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center sm:px-6">
+		<div
+			class:list={[
+				'flex h-20 w-20 items-center justify-center rounded-3xl text-4xl shadow-lg',
+				ok ? 'bg-gradient-to-br from-brand-500 to-sky-400 shadow-brand-500/25' : 'bg-zinc-100 dark:bg-zinc-800',
+			]}
+			aria-hidden="true"
+		>
+			{ok ? '🎉' : invalid ? '🤔' : '📬'}
+		</div>
+
+		<h1 class="mt-8 text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+			{ok ? '订阅成功！' : invalid ? '链接无效' : '正在确认…'}
+		</h1>
+
+		<p class="mt-4 max-w-sm text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+			{
+				ok
+					? '感谢订阅！新文章发布时会第一时间发邮件通知你。'
+					: invalid
+						? '验证链接无效或已过期（24 小时有效），请重新订阅一次。'
+						: '正在验证你的订阅，请稍候…'
+			}
+		</p>
+
+		<a
+			href="/blog"
+			class="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+		>
+			去逛逛博客
+		</a>
+	</section>
+</BaseLayout>

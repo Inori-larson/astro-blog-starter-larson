@@ -91,9 +91,40 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		.returning({ id: posts.id, slug: posts.slug });
 
 	await syncTags(db, row.id, body.tags ?? []);
-	if (status === 'published') await invalidateCache({ locals });
+	if (status === 'published') {
+		await invalidateCache({ locals });
+		// 通知已验证订阅者（未配置 RESEND_API_KEY 时静默跳过）
+		void notifySubscribers(locals, {
+			title: body.title.trim(),
+			description: body.description?.trim() ?? '',
+			slug: row.slug,
+		});
+	}
 	return Response.json({ ok: true, id: row.id, slug: row.slug }, { status: 201 });
 };
+
+/** 给已验证订阅者群发新文章通知（fire-and-forget，失败不影响发布） */
+async function notifySubscribers(
+	locals: App.Locals,
+	post: { title: string; description: string; slug: string },
+): Promise<void> {
+	try {
+		const env = locals.runtime.env as { RESEND_API_KEY?: string };
+		if (!env.RESEND_API_KEY) return;
+		const { subscribers } = await import('../../../../db/schema');
+		const { sendNewPost } = await import('../../../../lib/mail');
+		const db = getDb({ locals });
+		const rows = await db
+			.select({ email: subscribers.email })
+			.from(subscribers)
+			.where(eq(subscribers.verified, true));
+		for (const row of rows) {
+			await sendNewPost(env, row.email, post);
+		}
+	} catch {
+		// 通知失败不影响发布主流程
+	}
+}
 
 /** 标签同步（内联在此避免循环依赖） */
 async function syncTags(db: ReturnType<typeof getDb>, postId: number, tagNames: string[]) {

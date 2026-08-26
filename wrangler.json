@@ -14,6 +14,12 @@
 			"database_id": "e0d0602f-294b-4507-9f76-399ecf604be0"
 		}
 	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA",
+			"bucket_name": "larson-blog-media"
+		}
+	],
 	"kv_namespaces": [
 		{
 			"binding": "CACHE",

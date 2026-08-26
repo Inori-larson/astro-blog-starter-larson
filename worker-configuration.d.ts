@@ -9,6 +9,7 @@ declare namespace Cloudflare {
 		CACHE: KVNamespace;
 		SESSION: KVNamespace;
 		DB: D1Database;
+		MEDIA: R2Bucket;
 		ASSETS: Fetcher;
 	}
 }

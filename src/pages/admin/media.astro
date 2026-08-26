@@ -1,0 +1,194 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { requireAdminPage } from '../../lib/auth';
+
+export const prerender = false;
+
+const redirect = await requireAdminPage(Astro.locals.runtime.env, Astro.request);
+if (redirect) return redirect;
+---
+
+<AdminLayout title="媒体库">
+	<div class="mx-auto max-w-5xl">
+		<div class="flex flex-wrap items-center justify-between gap-3">
+			<div>
+				<h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">媒体库</h1>
+				<p class="mt-1 text-xs text-zinc-500 dark:text-zinc-500">图片 / 视频 / 音频，上传后一键复制链接插入文章</p>
+			</div>
+			<label
+				class="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-500/25 transition-all hover:-translate-y-0.5 dark:from-fate-gold-dark dark:to-fate-gold"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+					<polyline points="17 8 12 3 7 8"></polyline>
+					<line x1="12" x2="12" y1="3" y2="15"></line>
+				</svg>
+				上传文件
+				<input id="media-input" type="file" class="hidden" multiple accept="image/*,video/mp4,video/webm,audio/*" />
+			</label>
+		</div>
+
+		<!-- 上传进度 -->
+		<div id="upload-progress" class="mt-4 hidden">
+			<div class="flex items-center justify-between rounded-xl border border-brand-200 bg-brand-50/60 px-4 py-3 text-xs font-medium text-brand-700 dark:border-amber-500/30 dark:bg-amber-400/10 dark:text-amber-300">
+				<span id="upload-status">上传中…</span>
+				<span id="upload-count"></span>
+			</div>
+		</div>
+
+		<!-- R2 未启用提示 -->
+		<div
+			id="media-warning"
+			class="mt-4 hidden rounded-2xl border border-dashed border-amber-400/60 bg-amber-50/60 p-6 text-sm text-amber-700 dark:border-amber-500/40 dark:bg-amber-400/10 dark:text-amber-300"
+		>
+			<p class="font-semibold">媒体存储尚未就绪</p>
+			<p class="mt-1.5 text-xs leading-relaxed">
+				需要在 Cloudflare 控制台启用 R2（免费额度 10GB 存储）：左侧菜单「R2 Object Storage」→ 启用 → 创建名为
+				<code class="rounded bg-amber-100 px-1.5 py-0.5 dark:bg-amber-400/20">larson-blog-media</code> 的存储桶，然后重新部署即可。
+			</p>
+		</div>
+
+		<!-- 媒体网格 -->
+		<div id="media-grid" class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+			<p class="col-span-full py-12 text-center text-sm text-zinc-400 dark:text-zinc-600">加载中…</p>
+		</div>
+	</div>
+
+	<script>
+		interface MediaItem {
+			id: number;
+			r2Key: string;
+			filename: string;
+			mime: string;
+			size: number;
+			alt: string | null;
+			createdAt: string;
+		}
+
+		const esc = (s: string) =>
+			s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
+
+		const fmtSize = (n: number) => {
+			if (n > 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+			if (n > 1024) return Math.round(n / 1024) + ' KB';
+			return n + ' B';
+		};
+
+		let items: MediaItem[] = [];
+
+		function render() {
+			const grid = document.getElementById('media-grid')!;
+			grid.innerHTML = '';
+			if (!items.length) {
+				grid.innerHTML = '<p class="col-span-full py-12 text-center text-sm text-zinc-400 dark:text-zinc-600">还没有媒体文件，点击右上角上传</p>';
+				return;
+			}
+			for (const item of items) {
+				const url = '/media/' + item.r2Key;
+				const isImage = item.mime.startsWith('image/');
+				const isVideo = item.mime.startsWith('video/');
+				const div = document.createElement('div');
+				div.className = 'group relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900';
+				div.innerHTML = `
+					<div class="aspect-4/3 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+						${
+							isImage
+								? `<img src="${esc(url)}" alt="${esc(item.alt ?? '')}" loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">`
+								: isVideo
+									? `<video src="${esc(url)}" class="h-full w-full object-cover" muted preload="metadata"></video>`
+									: `<div class="flex h-full w-full items-center justify-center text-3xl">🎵</div>`
+						}
+					</div>
+					<div class="p-3">
+						<p class="truncate text-xs font-medium text-zinc-800 dark:text-zinc-200" title="${esc(item.filename)}">${esc(item.filename)}</p>
+						<p class="mt-0.5 text-[10px] text-zinc-400 dark:text-zinc-600">${fmtSize(item.size)}</p>
+					</div>
+					<div class="absolute inset-x-0 bottom-0 flex translate-y-full gap-1 bg-gradient-to-t from-zinc-950/80 to-transparent p-2 pt-6 transition-transform duration-200 group-hover:translate-y-0">
+						<button data-copy="${esc(url)}" class="flex-1 rounded-lg bg-white/90 py-1.5 text-[10px] font-bold text-zinc-800 transition-colors hover:bg-white">复制链接</button>
+						<button data-copy-md="${esc(url)}" class="flex-1 rounded-lg bg-white/90 py-1.5 text-[10px] font-bold text-zinc-800 transition-colors hover:bg-white">复制 Markdown</button>
+						<button data-del="${esc(item.r2Key)}" class="rounded-lg bg-rose-500/90 px-2 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-rose-500">删除</button>
+					</div>
+				`;
+				grid.appendChild(div);
+			}
+		}
+
+		async function load() {
+			try {
+				const res = await fetch('/api/admin/media');
+				if (res.status === 401) {
+					window.location.href = '/admin/login';
+					return;
+				}
+				const data = await res.json();
+				if (data.warning) {
+					document.getElementById('media-warning')?.classList.remove('hidden');
+					document.getElementById('media-warning')!.querySelector('p:last-child')!.textContent = data.warning;
+				}
+				items = data.items ?? [];
+				render();
+			} catch {
+				document.getElementById('media-grid')!.innerHTML =
+					'<p class="col-span-full py-12 text-center text-sm text-zinc-400">加载失败</p>';
+			}
+		}
+
+		// 上传
+		const input = document.getElementById('media-input') as HTMLInputElement;
+		input?.addEventListener('change', async () => {
+			const files = [...(input.files ?? [])];
+			if (!files.length) return;
+			const progress = document.getElementById('upload-progress')!;
+			const status = document.getElementById('upload-status')!;
+			const count = document.getElementById('upload-count')!;
+			progress.classList.remove('hidden');
+
+			for (const [i, file] of files.entries()) {
+				status.textContent = `上传中：${file.name}`;
+				count.textContent = `${i + 1}/${files.length}`;
+				const fd = new FormData();
+				fd.append('file', file);
+				try {
+					const res = await fetch('/api/admin/media', { method: 'POST', body: fd });
+					const data = await res.json();
+					if (!res.ok) {
+						status.textContent = `上传失败：${data.error ?? file.name}`;
+						await new Promise((r) => setTimeout(r, 2500));
+					}
+				} catch {
+					status.textContent = `网络错误：${file.name}`;
+					await new Promise((r) => setTimeout(r, 2000));
+				}
+			}
+			input.value = '';
+			await load();
+			status.textContent = '上传完成';
+			setTimeout(() => progress.classList.add('hidden'), 1500);
+		});
+
+		// 复制 / 删除（事件委托）
+		document.getElementById('media-grid')?.addEventListener('click', async (e) => {
+			const btn = e.target as HTMLElement;
+			if (btn.dataset.copy) {
+				const abs = new URL(btn.dataset.copy, location.origin).toString();
+				await navigator.clipboard.writeText(abs);
+				btn.textContent = '已复制 ✓';
+				setTimeout(() => (btn.textContent = '复制链接'), 1500);
+			} else if (btn.dataset.copyMd) {
+				const abs = new URL(btn.dataset.copyMd, location.origin).toString();
+				await navigator.clipboard.writeText(`![${items.find((i) => btn.dataset.copyMd!.endsWith(i.r2Key))?.filename ?? ''}](${abs})`);
+				btn.textContent = '已复制 ✓';
+				setTimeout(() => (btn.textContent = '复制 Markdown'), 1500);
+			} else if (btn.dataset.del) {
+				if (!confirm('确定删除这个文件？文章中引用它的地方会失效。')) return;
+				const res = await fetch(`/api/admin/media?key=${encodeURIComponent(btn.dataset.del)}`, { method: 'DELETE' });
+				if (res.ok) {
+					items = items.filter((i) => i.r2Key !== btn.dataset.del);
+					render();
+				}
+			}
+		});
+
+		load();
+	</script>
+</AdminLayout>

@@ -13,6 +13,7 @@
 		"jose": "^6.2.10",
 		"markdown-it": "^15.0.0",
 		"markdown-it-anchor": "^9.2.1",
+		"resend": "^6.22.1",
 		"shiki": "^4.4.3",
 		"tailwindcss": "^4.3.3",
 		"typescript": "5.9.3"
