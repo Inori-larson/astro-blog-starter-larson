@@ -200,3 +200,6 @@ dist
 
 ### Astro ###
 .astro/
+
+### 个人密钥文件，勿提交 ###
+drizzle/admin.sql
