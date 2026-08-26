@@ -62,13 +62,14 @@ if (session) return Astro.redirect('/admin/');
 			<!-- 品牌区 -->
 			<header class="text-center">
 				<span
-					class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 via-violet-500 to-fuchsia-500 text-2xl font-bold text-white shadow-xl shadow-brand-500/30"
+					class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-2xl font-bold text-white shadow-xl shadow-brand-500/30"
 					aria-hidden="true"
 				>
 					L
 				</span>
-				<h1 class="mt-5 text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-					欢迎回来
+				<h1 class="mt-5 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+					<span class="dark:hidden">欢迎回到母港，指挥官</span>
+					<span class="hidden dark:inline">令咒已就绪，御主</span>
 				</h1>
 				<p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
 					登录 {SITE_TITLE} 后台，继续你的创作
@@ -194,7 +195,7 @@ if (session) return Astro.redirect('/admin/');
 				<button
 					type="submit"
 					id="login-btn"
-					class="group mt-6 h-12 w-full rounded-xl bg-gradient-to-r from-brand-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-500/40 focus:outline-none focus:ring-4 focus:ring-brand-500/20 disabled:translate-y-0 disabled:opacity-60"
+					class="group mt-6 h-12 w-full rounded-xl bg-gradient-to-r from-brand-600 to-sky-500 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand-500/40 focus:outline-none focus:ring-4 focus:ring-brand-500/20 disabled:translate-y-0 disabled:opacity-60"
 				>
 					<span class="inline-flex items-center gap-2">
 						登 录
@@ -242,7 +243,7 @@ if (session) return Astro.redirect('/admin/');
 
 			<!-- 底部链接 -->
 			<footer class="mt-8 flex items-center justify-center gap-2 text-xs text-zinc-400 dark:text-zinc-600">
-				<a href="/" class="inline-flex items-center gap-1 transition-colors hover:text-brand-600 dark:hover:text-brand-400">
+				<a href="/" class="inline-flex items-center gap-1 transition-colors hover:text-brand-600 dark:hover:text-amber-300">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"

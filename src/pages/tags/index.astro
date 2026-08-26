@@ -26,9 +26,9 @@ const total = sorted.reduce((acc, t) => acc + t.count, 0);
 				sorted.map((entry) => (
 					<a
 						href={`/tags/${encodeURIComponent(entry.name)}`}
-						class="group flex items-center justify-between rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-brand-300/60 hover:shadow-lg hover:shadow-brand-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-brand-500/40"
+						class="group flex items-center justify-between rounded-2xl border border-zinc-200/80 bg-white px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-brand-300/60 hover:shadow-lg hover:shadow-brand-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-amber-500/60/40"
 					>
-						<span class="font-semibold text-zinc-800 transition-colors group-hover:text-brand-600 dark:text-zinc-200 dark:group-hover:text-brand-400">
+						<span class="font-semibold text-zinc-800 transition-colors group-hover:text-brand-600 dark:text-zinc-200 dark:group-hover:text-amber-300">
 							#{entry.name}
 						</span>
 						<span class="ml-3 shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">

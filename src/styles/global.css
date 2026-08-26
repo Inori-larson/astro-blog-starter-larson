@@ -6,6 +6,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================== 设计令牌 ============================== */
+/* 双世界观：浅色 = 碧蓝航线（海军蓝/天青/泊地白），暗色 = Fate（黑金/血红魔术回路） */
 @theme {
 	/* 字体栈：Atkinson（拉丁）+ 系统中文字体，避免外网字体请求 */
 	--font-sans:
@@ -16,20 +17,54 @@
 		ui-monospace, "JetBrains Mono", "Cascadia Code", Consolas, Menlo,
 		monospace;
 
-	/* 品牌色（靛蓝-紫罗兰渐变体系） */
-	--color-brand-50: #eef2ff;
-	--color-brand-100: #e0e7ff;
-	--color-brand-200: #c7d2fe;
-	--color-brand-300: #a5b4fc;
-	--color-brand-400: #818cf8;
-	--color-brand-500: #6366f1;
-	--color-brand-600: #4f46e5;
-	--color-brand-700: #4338ca;
-	--color-brand-800: #3730a3;
-	--color-brand-900: #312e81;
+	/* ===== 碧蓝航线：海军蓝 → 天青 → 泊地金（浅色主题品牌色） ===== */
+	--color-brand-50: #eff6ff;
+	--color-brand-100: #dbeafe;
+	--color-brand-200: #bfdbfe;
+	--color-brand-300: #93c5fd;
+	--color-brand-400: #60a5fa;
+	--color-brand-500: #3b82f6;
+	--color-brand-600: #1d5fb8;
+	--color-brand-700: #1e4f9c;
+	--color-brand-800: #1a407d;
+	--color-brand-900: #173665;
+
+	/* ===== Fate：暗金 → 血红强调（暗色主题专用） ===== */
+	--color-fate-gold: #d4af37;
+	--color-fate-gold-light: #e8c96a;
+	--color-fate-gold-dark: #9c7c1e;
+	--color-fate-blood: #a61e2b;
+	--color-fate-blood-light: #d0404e;
 
 	/* 动效时长 */
 	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================== 世界观主题变量 ============================== */
+:root {
+	/* 碧蓝航线（浅色）：海空氛围 */
+	--world-bg: #f0f7fd;
+	--world-bg-accent: #e1effb;
+	--world-text: #33526e;
+	--world-text-strong: #173a56;
+	--world-border: #c8dff0;
+	--world-card: #ffffff;
+	--world-accent: #1d5fb8;
+	--world-accent-soft: rgba(29, 95, 184, 0.08);
+	--world-glow: rgba(59, 130, 246, 0.18);
+}
+
+.dark {
+	/* Fate（暗色）：圣杯战争之夜——黑金魔术回路 */
+	--world-bg: #14100c;
+	--world-bg-accent: #1d1712;
+	--world-text: #a89a7c;
+	--world-text-strong: #e8dcc0;
+	--world-border: #3a2f1e;
+	--world-card: #1c1610;
+	--world-accent: #d4af37;
+	--world-accent-soft: rgba(212, 175, 55, 0.1);
+	--world-glow: rgba(212, 175, 55, 0.12);
 }
 
 /* ============================== 基础样式 ============================== */
@@ -42,16 +77,35 @@
 	body {
 		@apply bg-zinc-50 font-sans text-zinc-600 antialiased dark:bg-zinc-950 dark:text-zinc-400;
 		text-rendering: optimizeLegibility;
+		/* 世界观背景：浅色=海面波光渐变，暗色=魔术回路暗纹 */
+		background-color: var(--world-bg);
+		background-image:
+			radial-gradient(ellipse 80% 50% at 50% -10%, var(--world-glow), transparent),
+			linear-gradient(var(--world-bg-accent), var(--world-bg));
+		background-attachment: fixed;
+	}
+
+	.dark body {
+		color: var(--world-text);
 	}
 
 	::selection {
 		@apply bg-brand-500/25 text-zinc-900 dark:text-white;
 	}
 
+	.dark ::selection {
+		background: rgba(212, 175, 55, 0.3);
+		color: #f5ecd0;
+	}
+
 	/* 细滚动条 */
 	* {
 		scrollbar-width: thin;
 		scrollbar-color: rgb(161 161 170 / 0.4) transparent;
+	}
+
+	.dark * {
+		scrollbar-color: rgba(212, 175, 55, 0.35) transparent;
 	}
 }
 
@@ -72,8 +126,13 @@
 }
 
 /* ============================== 渐变文字工具类 ============================== */
+/* 浅色：海军蓝→天青（碧蓝航线）；暗色：暗金（Fate） */
 @utility text-gradient {
-	@apply bg-gradient-to-r from-brand-500 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent;
+	@apply bg-gradient-to-r from-brand-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent;
+}
+
+.dark .text-gradient {
+	background-image: linear-gradient(120deg, #e8c96a, #d4af37 45%, #9c7c1e);
 }
 
 /* ============================== Shiki 双主题代码高亮 ============================== */
@@ -98,29 +157,70 @@
 		@apply text-zinc-900 dark:text-white;
 		scroll-margin-top: 6rem;
 	}
+	/* 标题装饰：浅色=海浪线，暗色=金色令印线 */
 	:where(h2) {
-		@apply mt-12 mb-5 pb-2 border-b border-zinc-200 dark:border-zinc-800;
+		@apply mt-12 mb-5 pb-2;
+		border-bottom: 2px solid var(--world-border);
+		position: relative;
+	}
+	:where(h2)::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		bottom: -2px;
+		width: 3.5rem;
+		height: 2px;
+		background: linear-gradient(90deg, var(--world-accent), transparent);
+	}
+	.dark :where(h2)::after {
+		background: linear-gradient(90deg, #d4af37, transparent);
 	}
 	:where(a) {
 		@apply font-medium text-brand-600 no-underline decoration-brand-400/50 underline-offset-4 transition-colors hover:text-brand-500 hover:underline dark:text-brand-400;
 	}
+	.dark :where(a) {
+		color: #d4af37;
+	}
+	.dark :where(a:hover) {
+		color: #e8c96a;
+	}
 	:where(strong) {
 		@apply text-zinc-900 dark:text-zinc-100;
 	}
+	/* 引用块：浅色=泊地指令风（海军蓝边），暗色=魔术咏唱风（金边+血色引号） */
 	:where(blockquote) {
-		@apply my-6 rounded-r-xl border-l-4 border-brand-400 bg-brand-50/60 py-1 pl-5 pr-4 text-zinc-600 not-italic dark:bg-brand-500/10 dark:text-zinc-400;
+		@apply my-6 rounded-r-xl border-l-4 py-1 pl-5 pr-4 text-zinc-600 not-italic dark:text-zinc-400;
+		border-left-color: #3b82f6;
+		background: linear-gradient(90deg, rgba(59, 130, 246, 0.06), transparent);
+		position: relative;
+	}
+	.dark :where(blockquote) {
+		border-left-color: #d4af37;
+		background: linear-gradient(90deg, rgba(212, 175, 55, 0.07), transparent);
 	}
 	:where(blockquote p) {
 		@apply my-2;
 	}
 	:where(code) {
-		@apply rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.85em] font-medium text-pink-600 before:content-none after:content-none dark:bg-zinc-800 dark:text-pink-400;
+		@apply rounded-md bg-zinc-100 px-1.5 py-0.5 font-mono text-[0.85em] font-medium before:content-none after:content-none dark:bg-zinc-800;
+		color: #c2410c;
+	}
+	.dark :where(code) {
+		color: #e8c96a;
+		background: rgba(212, 175, 55, 0.12);
 	}
 	:where(img) {
 		@apply rounded-xl;
 	}
 	:where(hr) {
-		@apply my-10 border-zinc-200 dark:border-zinc-800;
+		@apply my-10;
+		border: none;
+		height: 1px;
+		background: repeating-linear-gradient(
+			90deg,
+			var(--world-border) 0 8px,
+			transparent 8px 16px
+		);
 	}
 	:where(table) {
 		@apply my-6 text-sm;
@@ -198,6 +298,100 @@ pre:hover .code-copy,
 /* ============================== 搜索结果选中态 ============================== */
 .search-active {
 	@apply bg-brand-50 dark:bg-brand-500/10;
+}
+
+/* ============================== 点击特效 ============================== */
+/* 浅色=水花波纹（泊地），暗色=魔术火花（Fate 令印） */
+.click-fx {
+	position: fixed;
+	pointer-events: none;
+	z-index: 9999;
+	width: 10px;
+	height: 10px;
+	border-radius: 9999px;
+	transform: translate(-50%, -50%);
+	animation: click-fx 0.55s ease-out forwards;
+}
+.click-fx::before,
+.click-fx::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	border: 2px solid #3b82f6;
+	opacity: 0.8;
+}
+.click-fx::after {
+	border-color: #93c5fd;
+	animation-delay: 0.08s;
+}
+.dark .click-fx::before {
+	border-color: #d4af37;
+	box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+}
+.dark .click-fx::after {
+	border-color: #a61e2b;
+	box-shadow: 0 0 8px rgba(166, 30, 43, 0.7);
+}
+@keyframes click-fx {
+	0% {
+		transform: translate(-50%, -50%) scale(0.4);
+		opacity: 1;
+	}
+	100% {
+		transform: translate(-50%, -50%) scale(3.2);
+		opacity: 0;
+	}
+}
+
+/* ============================== 二次元装饰元素 ============================== */
+/* 角落缎带徽章（卡片右上角的「装饰斜带」） */
+.kawaii-badge {
+	position: absolute;
+	top: 10px;
+	right: -30px;
+	transform: rotate(45deg);
+	padding: 2px 34px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.15em;
+	color: #fff;
+	background: linear-gradient(90deg, #1d5fb8, #3b82f6);
+	box-shadow: 0 2px 6px rgba(29, 95, 184, 0.35);
+}
+.dark .kawaii-badge {
+	background: linear-gradient(90deg, #9c7c1e, #d4af37);
+	box-shadow: 0 2px 6px rgba(212, 175, 55, 0.35);
+}
+
+/* 魔法阵加载动画（暗色模式 Fetch 反馈） */
+.mahoujin {
+	position: relative;
+	width: 42px;
+	height: 42px;
+}
+.mahoujin::before,
+.mahoujin::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: 9999px;
+	border: 2px solid transparent;
+}
+.mahoujin::before {
+	border-top-color: #d4af37;
+	border-right-color: rgba(212, 175, 55, 0.35);
+	animation: spin 1.1s linear infinite;
+}
+.mahoujin::after {
+	inset: 8px;
+	border-bottom-color: #a61e2b;
+	animation: spin 0.9s linear infinite reverse;
+}
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* ============================== 打印样式 ============================== */

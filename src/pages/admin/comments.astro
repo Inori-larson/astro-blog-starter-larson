@@ -95,7 +95,7 @@ if (redirect) return redirect;
 						<time class="text-xs text-zinc-400 dark:text-zinc-600">${fmtDate(c.createdAt)}</time>
 						${
 							c.postSlug
-								? `<a href="/blog/${c.postSlug}/" target="_blank" class="ml-auto text-xs text-zinc-400 transition-colors hover:text-brand-600 dark:hover:text-brand-400">于「${esc(c.postTitle ?? '')}」 ↗</a>`
+								? `<a href="/blog/${c.postSlug}/" target="_blank" class="ml-auto text-xs text-zinc-400 transition-colors hover:text-brand-600 dark:hover:text-amber-300">于「${esc(c.postTitle ?? '')}」 ↗</a>`
 								: '<span class="ml-auto text-xs text-zinc-400">文章已删除</span>'
 						}
 					</div>

@@ -14,16 +14,21 @@ export const prerender = true;
 		</div>
 
 		<p class="text-gradient font-mono text-8xl font-bold sm:text-9xl">404</p>
-		<h1 class="mt-6 text-2xl font-bold text-zinc-900 dark:text-white">页面迷失在太空了</h1>
+		<h1 class="mt-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+			<span class="dark:hidden">这片海域尚未开辟</span>
+			<span class="hidden dark:inline">此路通往梦境的彼端</span>
+		</h1>
 		<p class="mt-3 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-			你要找的页面不存在，或者已经被移动到了别的地方。
+			<span class="dark:hidden">航线偏离了航图——你要找的页面不存在，或已被移往新的泊位。</span>
+			<span class="hidden dark:inline">魔术回路未能抵达目的地——页面不存在，或已被转移至圣杯的深处。</span>
 		</p>
 		<div class="mt-8 flex flex-wrap justify-center gap-3">
 			<a
 				href="/"
-				class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+				class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-600 to-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
 			>
-				返回首页
+				<span class="dark:hidden">返回母港</span>
+				<span class="hidden dark:inline">返回现实</span>
 			</a>
 			<a
 				href="/blog"

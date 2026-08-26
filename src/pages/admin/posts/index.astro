@@ -91,7 +91,7 @@ if (redirect) return redirect;
 					tr.className = 'border-b border-zinc-50 transition-colors last:border-0 hover:bg-zinc-50/80 dark:border-zinc-800/50 dark:hover:bg-zinc-800/40';
 					tr.innerHTML = `
 						<td class="px-5 py-3.5">
-							<a href="/admin/posts/${p.id}" class="font-medium text-zinc-800 transition-colors hover:text-brand-600 dark:text-zinc-200 dark:hover:text-brand-400">${esc(p.title)}</a>
+							<a href="/admin/posts/${p.id}" class="font-medium text-zinc-800 transition-colors hover:text-brand-600 dark:text-zinc-200 dark:hover:text-amber-300">${esc(p.title)}</a>
 							<span class="ml-2 font-mono text-xs text-zinc-400 dark:text-zinc-600">${esc(p.slug)}</span>
 						</td>
 						<td class="px-3 py-3.5">
@@ -104,7 +104,7 @@ if (redirect) return redirect;
 						<td class="px-3 py-3.5 text-xs text-zinc-400 dark:text-zinc-500">${fmtDate(p.publishedAt)}</td>
 						<td class="px-3 py-3.5 text-xs text-zinc-400 dark:text-zinc-500">${p.readingMinutes} 分钟</td>
 						<td class="px-5 py-3.5 text-right">
-							<a href="/blog/${p.slug}/" target="_blank" class="text-xs font-medium text-zinc-400 transition-colors hover:text-brand-600 dark:hover:text-brand-400">查看</a>
+							<a href="/blog/${p.slug}/" target="_blank" class="text-xs font-medium text-zinc-400 transition-colors hover:text-brand-600 dark:hover:text-amber-300">查看</a>
 							<button data-del="${p.id}" class="ml-3 text-xs font-medium text-zinc-400 transition-colors hover:text-rose-500">删除</button>
 						</td>
 					`;

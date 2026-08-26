@@ -120,8 +120,8 @@ if (redirect) return redirect;
 					const li = document.createElement('li');
 					li.className = 'flex items-center gap-3';
 					li.innerHTML = `
-						<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${i < 3 ? 'bg-gradient-to-br from-brand-500 to-violet-500 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'} text-xs font-bold">${i + 1}</span>
-						<a href="/blog/${p.slug}/" target="_blank" class="flex-1 truncate font-medium text-zinc-700 transition-colors hover:text-brand-600 dark:text-zinc-300 dark:hover:text-brand-400">${p.title.replace(/</g, '&lt;')}</a>
+						<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${i < 3 ? 'bg-gradient-to-br from-brand-600 to-sky-500 text-white' : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'} text-xs font-bold">${i + 1}</span>
+						<a href="/blog/${p.slug}/" target="_blank" class="flex-1 truncate font-medium text-zinc-700 transition-colors hover:text-brand-600 dark:text-zinc-300 dark:hover:text-amber-300">${p.title.replace(/</g, '&lt;')}</a>
 						<span class="shrink-0 text-xs text-zinc-400 dark:text-zinc-600">${p.views} 浏览 · ${p.likes} 赞</span>
 					`;
 					hot.appendChild(li);

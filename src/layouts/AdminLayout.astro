@@ -35,7 +35,7 @@ const { title } = Astro.props;
 			<aside class="fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-200/70 bg-white dark:border-zinc-800 dark:bg-zinc-900">
 				<a href="/admin/" class="flex h-16 items-center gap-2.5 border-b border-zinc-200/70 px-5 dark:border-zinc-800">
 					<span
-						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white"
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
 						aria-hidden="true">L</span
 					>
 					<span class="text-sm font-bold text-zinc-900 dark:text-white">后台管理</span>
@@ -122,7 +122,7 @@ const { title } = Astro.props;
 						? path === '/admin/' || path === '/admin'
 						: path.startsWith(href);
 				if (active) {
-					a.classList.add('bg-brand-50', 'text-brand-600', 'dark:bg-brand-500/10', 'dark:text-brand-400');
+					a.classList.add('bg-brand-50', 'text-brand-600', 'dark:bg-amber-400/10', 'dark:text-amber-400');
 				}
 			});
 

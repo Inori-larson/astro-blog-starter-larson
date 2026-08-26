@@ -1,14 +1,15 @@
 ---
-// 主题切换按钮：切换 html.dark 类并持久化到 localStorage
+// 世界观切换按钮：碧蓝航线（浅色）⇄ Fate（暗色）
+// 图标语义：太阳=白天的母港，月亮=圣杯战争之夜
 ---
 
 <button
 	id="theme-toggle"
 	type="button"
-	aria-label="切换浅色 / 深色主题"
-	class="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+	aria-label="切换世界观：碧蓝航线 / Fate"
+	class="group inline-flex h-9 w-9 items-center justify-center rounded-full transition-all hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400 text-zinc-500 dark:text-amber-200/70"
 >
-	<!-- 太阳（浅色模式下显示） -->
+	<!-- 白天：碧蓝航线——舵轮/太阳（浅色模式显示） -->
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
@@ -17,7 +18,7 @@
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"
-		class="h-[1.15rem] w-[1.15rem] dark:hidden"
+		class="h-[1.15rem] w-[1.15rem] transition-transform duration-500 group-hover:rotate-90 dark:hidden text-brand-600"
 		aria-hidden="true"
 	>
 		<circle cx="12" cy="12" r="4"></circle>
@@ -25,7 +26,7 @@
 			d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
 		></path>
 	</svg>
-	<!-- 月亮（深色模式下显示） -->
+	<!-- 夜晚：Fate——月之魔术（暗色模式显示，金色） -->
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
@@ -34,10 +35,11 @@
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"
-		class="hidden h-[1.15rem] w-[1.15rem] dark:block"
+		class="hidden h-[1.15rem] w-[1.15rem] transition-transform duration-500 group-hover:-rotate-12 dark:block text-amber-400"
 		aria-hidden="true"
 	>
 		<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+		<path d="M19 3v4M21 5h-4" stroke-width="1.5"></path>
 	</svg>
 </button>
 

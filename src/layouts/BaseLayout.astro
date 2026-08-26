@@ -50,7 +50,26 @@ const { title, description, image, class: className } = Astro.props;
 				);
 				els.forEach((el) => io.observe(el));
 			};
-			document.addEventListener('astro:page-load', initReveal);
+
+			// 点击特效：浅色=水花波纹，暗色=魔术火花（自动跟随主题）
+			const initClickFx = () => {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				document.addEventListener('pointerdown', (e) => {
+					if (e.button !== 0) return;
+					// 避免在输入框/按钮密集区过多干扰：仅装饰，不拦截
+					const fx = document.createElement('span');
+					fx.className = 'click-fx';
+					fx.style.left = `${e.clientX}px`;
+					fx.style.top = `${e.clientY}px`;
+					document.body.appendChild(fx);
+					setTimeout(() => fx.remove(), 600);
+				});
+			};
+
+			document.addEventListener('astro:page-load', () => {
+				initReveal();
+				initClickFx();
+			});
 		</script>
 	</body>
 </html>
