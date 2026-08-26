@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, isNull, and } from 'drizzle-orm';
 import { getDb } from '../../../../lib/db';
 import { posts } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
@@ -9,7 +9,7 @@ import GithubSlugger from 'github-slugger';
 
 export const prerender = false;
 
-/** 管理端文章列表（含草稿） */
+/** 管理端文章列表（含草稿，不含已删除） */
 export const GET: APIRoute = async ({ request, locals }) => {
 	const guard = await requireAdmin(locals.runtime.env, request);
 	if ('response' in guard) return guard.response;
@@ -26,6 +26,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 			readingMinutes: posts.readingMinutes,
 		})
 		.from(posts)
+		.where(isNull(posts.deletedAt))
 		.orderBy(desc(posts.publishedAt));
 	return Response.json({ items: rows });
 };

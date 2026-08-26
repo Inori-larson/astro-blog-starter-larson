@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { getDb } from '../../../../lib/db';
 import { posts, postTags, tags } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
@@ -20,7 +20,11 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
 	if (!Number.isInteger(id)) return Response.json({ error: '无效 id' }, { status: 400 });
 
 	const db = getDb({ locals });
-	const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
+	const [post] = await db
+		.select()
+		.from(posts)
+		.where(and(eq(posts.id, id), isNull(posts.deletedAt)))
+		.limit(1);
 	if (!post) return Response.json({ error: '文章不存在' }, { status: 404 });
 
 	const tagRows = await db
@@ -48,7 +52,11 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
 	}
 
 	const db = getDb({ locals });
-	const [existing] = await db.select({ id: posts.id, slug: posts.slug }).from(posts).where(eq(posts.id, id)).limit(1);
+	const [existing] = await db
+		.select({ id: posts.id, slug: posts.slug })
+		.from(posts)
+		.where(and(eq(posts.id, id), isNull(posts.deletedAt)))
+		.limit(1);
 	if (!existing) return Response.json({ error: '文章不存在' }, { status: 404 });
 
 	if (body.slug) {
