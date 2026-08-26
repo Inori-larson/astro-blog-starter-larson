@@ -12,18 +12,16 @@ tags: ["MDX", "写作", "技术"]
 
 普通的 Markdown 足以覆盖 95% 的写作场景，但剩下那 5% 很折磨人：想放一个可交互的演示、一个带状态的按钮、一个动态生成的图表，就只能截一张图，然后眼睁睁看着它过时。
 
-MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以[把组件和逻辑直接混进 Markdown 内容](https://mdxjs.com/docs/what-is-mdx/)里，文字和代码终于活在同一个文件里。
+MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以把组件和逻辑直接混进 Markdown 内容里，文字和代码终于活在同一个文件里。
 
 ## 一个实际的例子
 
 在 MDX 里嵌入组件大概长这样——写的时候是代码，渲染出来就是真正可以点击的元素：
 
 ```mdx
-import HeaderLink from "../../components/HeaderLink.astro";
+import LikeButton from "../components/LikeButton";
 
-<HeaderLink href="#" onclick="alert('clicked!')">
-	文章里嵌入的组件
-</HeaderLink>
+<LikeButton slug="hello-world" />
 ```
 
 如果我只想"说明"这个按钮的行为，贴张图就够了；但既然可以让你亲手点一下，为什么不呢？
@@ -36,5 +34,4 @@ import HeaderLink from "../../components/HeaderLink.astro";
 
 ## 延伸阅读
 
-- [MDX 语法文档](https://mdxjs.com/docs/what-is-mdx)
 - [我的 Markdown 写作语法指南](/blog/markdown-style-guide/)——下一篇就说说这个博客里常用的排版语法

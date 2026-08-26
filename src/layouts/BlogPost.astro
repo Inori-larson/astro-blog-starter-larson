@@ -45,9 +45,6 @@ const { title, description, pubDate, updatedDate, heroImage, tags = [], headings
 
 const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
 
-const shareUrl = new URL(Astro.url.pathname, Astro.site).toString();
-const xShare = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`;
-const weiboShare = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}`;
 ---
 
 <BaseLayout title={`${title} · ${SITE_TITLE}`} description={description} image={heroImage}>
@@ -209,42 +206,6 @@ const weiboShare = `https://service.weibo.com/share/share.php?url=${encodeURICom
 					</svg>
 					<span>复制链接</span>
 				</button>
-				<a
-					href={xShare}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="inline-flex h-9 items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-600 transition-all hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-500"
-				>
-					<svg viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5" aria-hidden="true">
-						<path
-							d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-						></path>
-					</svg>
-					<span>分享到 X</span>
-				</a>
-				<a
-					href={weiboShare}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="inline-flex h-9 items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-600 transition-all hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-500"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="h-3.5 w-3.5"
-						aria-hidden="true"
-					>
-						<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-						<polyline points="16 6 12 2 8 6"></polyline>
-						<line x1="12" x2="12" y1="2" y2="15"></line>
-					</svg>
-					<span>微博</span>
-				</a>
 			</div>
 		</div>
 

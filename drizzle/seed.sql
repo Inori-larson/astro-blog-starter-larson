@@ -478,18 +478,16 @@ X<sup>n</sup> + Y<sup>n</sup> = Z<sup>n</sup>
 
 普通的 Markdown 足以覆盖 95% 的写作场景，但剩下那 5% 很折磨人：想放一个可交互的演示、一个带状态的按钮、一个动态生成的图表，就只能截一张图，然后眼睁睁看着它过时。
 
-MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以[把组件和逻辑直接混进 Markdown 内容](https://mdxjs.com/docs/what-is-mdx/)里，文字和代码终于活在同一个文件里。
+MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以把组件和逻辑直接混进 Markdown 内容里，文字和代码终于活在同一个文件里。
 
 ## 一个实际的例子
 
 在 MDX 里嵌入组件大概长这样——写的时候是代码，渲染出来就是真正可以点击的元素：
 
 ```mdx
-import HeaderLink from "../../components/HeaderLink.astro";
+import LikeButton from "../components/LikeButton";
 
-<HeaderLink href="#" onclick="alert(''clicked!'')">
-	文章里嵌入的组件
-</HeaderLink>
+<LikeButton slug="hello-world" />
 ```
 
 如果我只想"说明"这个按钮的行为，贴张图就够了；但既然可以让你亲手点一下，为什么不呢？
@@ -502,19 +500,16 @@ import HeaderLink from "../../components/HeaderLink.astro";
 
 ## 延伸阅读
 
-- [MDX 语法文档](https://mdxjs.com/docs/what-is-mdx)
 - [我的 Markdown 写作语法指南](/blog/markdown-style-guide/)——下一篇就说说这个博客里常用的排版语法
 ', '<p>这个博客的写作格式是 MDX。简单说，它就是&quot;会写组件的 Markdown&quot;——在正文里可以直接 import 并渲染 UI 组件，而不是只能贴静态代码块。</p>
 <h2 id="为什么我选了-mdx" tabindex="-1">为什么我选了 MDX</h2>
 <p>普通的 Markdown 足以覆盖 95% 的写作场景，但剩下那 5% 很折磨人：想放一个可交互的演示、一个带状态的按钮、一个动态生成的图表，就只能截一张图，然后眼睁睁看着它过时。</p>
-<p>MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以<a href="https://mdxjs.com/docs/what-is-mdx/">把组件和逻辑直接混进 Markdown 内容</a>里，文字和代码终于活在同一个文件里。</p>
+<p>MDX 把这 5% 补上了：它支持嵌入 JavaScript 和 JSX 语法，可以把组件和逻辑直接混进 Markdown 内容里，文字和代码终于活在同一个文件里。</p>
 <h2 id="一个实际的例子" tabindex="-1">一个实际的例子</h2>
 <p>在 MDX 里嵌入组件大概长这样——写的时候是代码，渲染出来就是真正可以点击的元素：</p>
-<pre class="astro-code shiki language-mdx" shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> HeaderLink </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "../../components/HeaderLink.astro"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<pre class="astro-code shiki language-mdx" shiki-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8" tabindex="0"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LikeButton </span><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "../components/LikeButton"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HeaderLink</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> href</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"#"</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> onclick</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"alert(''clicked!'')"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">></span></span>
-<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">	文章里嵌入的组件</span></span>
-<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;/</span><span style="color:#005CC5;--shiki-dark:#79B8FF">HeaderLink</span><span style="color:#24292E;--shiki-dark:#E1E4E8">></span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&#x3C;</span><span style="color:#005CC5;--shiki-dark:#79B8FF">LikeButton</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> slug</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hello-world"</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> /></span></span>
 <span class="line"></span></code></pre><p>如果我只想&quot;说明&quot;这个按钮的行为，贴张图就够了；但既然可以让你亲手点一下，为什么不呢？</p>
 <h2 id="一点使用心得" tabindex="-1">一点使用心得</h2>
 <ul>
@@ -524,7 +519,6 @@ import HeaderLink from "../../components/HeaderLink.astro";
 </ul>
 <h2 id="延伸阅读" tabindex="-1">延伸阅读</h2>
 <ul>
-<li><a href="https://mdxjs.com/docs/what-is-mdx">MDX 语法文档</a></li>
 <li><a href="/blog/markdown-style-guide/">我的 Markdown 写作语法指南</a>——下一篇就说说这个博客里常用的排版语法</li>
 </ul>
 ', '/blog-placeholder-5.jpg', 'published', 1717171200000, NULL, 1, NULL, 1717171200000, NULL);
@@ -550,4 +544,4 @@ INSERT INTO post_tags (post_id, tag_id) VALUES
 (5, 8),
 (5, 4),
 (5, 5);
-INSERT OR IGNORE INTO settings (key, value) VALUES ('seeded_at', '2026-08-25T12:48:12.306Z');
+INSERT OR IGNORE INTO settings (key, value) VALUES ('seeded_at', '2026-08-26T07:53:25.829Z');

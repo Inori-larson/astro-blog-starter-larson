@@ -5,7 +5,6 @@ export interface Project {
 	description: string;
 	tags: string[];
 	url?: string;
-	repo?: string;
 	status: ProjectStatus;
 	featured?: boolean;
 	icon: string;
@@ -19,16 +18,13 @@ export const STATUS_LABELS: Record<ProjectStatus, string> = {
 	planned: '规划中',
 };
 
-const GITHUB = 'https://github.com/larson';
-
 export const projects: Project[] = [
 	{
 		name: "Larson's Blog 2.0",
 		description:
 			'你正在浏览的网站——我的个人博客第三次改版。手写的全栈站点：全文搜索、暗色模式、评论系统与后台管理。',
-		tags: ['TypeScript', 'Cloudflare', '全栈'],
+		tags: ['TypeScript', '全栈', '写作'],
 		url: '/',
-		repo: `${GITHUB}/blog`,
 		status: 'active',
 		featured: true,
 		icon: '🚀',
@@ -39,7 +35,6 @@ export const projects: Project[] = [
 		description:
 			'我为 side project 造的轮子：轻量组件库，零依赖、按需加载，30+ 常用组件与完整的暗色模式支持。',
 		tags: ['Vue', 'Vite', '组件库'],
-		repo: `${GITHUB}/nova-ui`,
 		status: 'maintained',
 		featured: true,
 		icon: '🎨',
@@ -49,7 +44,6 @@ export const projects: Project[] = [
 		name: 'Tiny CLI',
 		description: '写给自己的一套零依赖命令行工具集，把日常重复操作压缩成一条命令。',
 		tags: ['Node.js', 'CLI'],
-		repo: `${GITHUB}/tiny-cli`,
 		status: 'finished',
 		icon: '⚙️',
 		gradient: 'from-emerald-500 to-teal-400',
@@ -58,7 +52,6 @@ export const projects: Project[] = [
 		name: 'DataLens',
 		description: '面向个人用户的数据可视化仪表盘，拖拽配置、实时刷新、一键分享。',
 		tags: ['React', 'D3.js', '数据可视化'],
-		url: 'https://example.com',
 		status: 'active',
 		icon: '📊',
 		gradient: 'from-amber-500 to-orange-500',
@@ -67,7 +60,6 @@ export const projects: Project[] = [
 		name: 'MarkFlow',
 		description: 'Markdown 预处理器，支持自定义指令、变量替换与图表语法扩展，本站写作工作流的一部分。',
 		tags: ['Markdown', '编译器'],
-		repo: `${GITHUB}/markflow`,
 		status: 'maintained',
 		icon: '📝',
 		gradient: 'from-rose-500 to-pink-500',
