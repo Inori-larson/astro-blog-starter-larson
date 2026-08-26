@@ -1,0 +1,5 @@
+name: larson-blog
+
+build:
+  command: npm ci && npm run build
+  destination: dist
