@@ -86,16 +86,16 @@ const { showLabel = false, labelAlign = 'col' } = Astro.props;
 
 	const tryBind = () => {
 		if (bindThemeToggle()) return;
-		// 按钮未就绪：等 DOM 完成后重试
+		// 按钮未就绪：DOM 完成后重试 + MutationObserver 兜底（流式渲染晚出现的按钮）
 		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', () => bindThemeToggle(), { once: true });
-		} else {
-			// 极端情况：流式渲染仍在进行，用轮询兜底（500ms 内）
-			let tries = 0;
-			const timer = setInterval(() => {
-				if (bindThemeToggle() || ++tries > 20) clearInterval(timer);
-			}, 25);
+			document.addEventListener('DOMContentLoaded', () => tryBind(), { once: true });
 		}
+		const observer = new MutationObserver(() => {
+			if (bindThemeToggle()) observer.disconnect();
+		});
+		observer.observe(document.documentElement, { childList: true, subtree: true });
+		// 双保险：60 秒后自动停止观察（页面早就不动了）
+		setTimeout(() => observer.disconnect(), 60_000);
 	};
 
 	// 防重复初始化：同一文档只挂一次监听（软导航时 astro:page-load 负责重绑新按钮）
