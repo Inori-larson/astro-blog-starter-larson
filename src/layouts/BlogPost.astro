@@ -128,22 +128,20 @@ const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
 			}
 		</header>
 
-		<!-- 头图（与卡片共享元素过渡） -->
-		{
-			heroImage && (
-				<div class="reveal mx-auto mt-10 max-w-4xl" transition:name={slug ? `hero-${slug}` : undefined}>
-					<img
-						src={heroImage}
-						alt=""
-						width={1020}
-						height={510}
-						loading="eager"
-						fetchpriority="high"
-						class="aspect-2/1 w-full rounded-2xl border border-zinc-200/60 object-cover shadow-lg shadow-zinc-900/5 dark:border-zinc-800"
-					/>
-				</div>
-			)
-		}
+	<!-- 头图（自适应原始比例，与卡片共享元素过渡） -->
+	{
+		heroImage && (
+			<div class="reveal mx-auto mt-10 max-w-4xl" transition:name={slug ? `hero-${slug}` : undefined}>
+				<img
+					src={heroImage}
+					alt=""
+					loading="eager"
+					fetchpriority="high"
+					class="mx-auto max-h-[80vh] w-full rounded-2xl border border-zinc-200/60 object-contain shadow-lg shadow-zinc-900/5 dark:border-zinc-800"
+				/>
+			</div>
+		)
+	}
 
 		<!-- 移动端折叠目录 -->
 		{

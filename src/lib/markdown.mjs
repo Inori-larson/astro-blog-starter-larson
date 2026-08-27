@@ -55,6 +55,18 @@ const defaultFence =
 
 const state = { highlighter: null };
 
+/* 正文图片：懒加载 + 异步解码 + 自适应尺寸（R2 /media/ 路径或外链均可） */
+const defaultImage =
+	md.renderer.rules.image ??
+	((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options));
+
+md.renderer.rules.image = (tokens, idx, options, env, self) => {
+	const token = tokens[idx];
+	token.attrSet('loading', 'lazy');
+	token.attrSet('decoding', 'async');
+	return defaultImage(tokens, idx, options, env, self);
+};
+
 md.renderer.rules.fence = (tokens, idx, options, env, self) => {
 	const token = tokens[idx];
 	const lang = (token.info || '').trim().split(/\s+/)[0]?.toLowerCase() || 'text';

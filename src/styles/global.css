@@ -210,7 +210,9 @@
 		background: rgba(212, 175, 55, 0.12);
 	}
 	:where(img) {
-		@apply rounded-xl;
+		@apply mx-auto rounded-xl;
+		max-width: 100%;
+		height: auto;
 	}
 	:where(hr) {
 		@apply my-10;
