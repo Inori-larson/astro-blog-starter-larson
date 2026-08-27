@@ -1,13 +1,28 @@
 ---
 // 世界观切换按钮：碧蓝航线（浅色）⇄ Fate（暗色）
 // 图标语义：太阳=白天的母港，月亮=圣杯战争之夜
+interface Props {
+	/** 显示文字标签（后台侧边栏用） */
+	showLabel?: boolean;
+	/** 标签对齐方式：row = 图标左文字右（侧边栏），col = 图标上文字下 */
+	labelAlign?: 'row' | 'col';
+}
+
+const { showLabel = false, labelAlign = 'col' } = Astro.props;
 ---
 
 <button
 	id="theme-toggle"
 	type="button"
 	aria-label="切换世界观：碧蓝航线 / Fate"
-	class="group inline-flex h-9 w-9 items-center justify-center rounded-full transition-all hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400 text-zinc-500 dark:text-amber-200/70"
+	class:list={[
+		'group transition-all text-zinc-500 dark:text-amber-200/70',
+		showLabel
+			? labelAlign === 'row'
+				? 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800'
+				: 'inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400'
+			: 'inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400',
+	]}
 >
 	<!-- 白天：碧蓝航线——舵轮/太阳（浅色模式显示） -->
 	<svg
@@ -18,7 +33,7 @@
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"
-		class="h-[1.15rem] w-[1.15rem] transition-transform duration-500 group-hover:rotate-90 dark:hidden text-brand-600"
+		class="h-[1.15rem] w-[1.15rem] shrink-0 transition-transform duration-500 group-hover:rotate-90 dark:hidden text-brand-600"
 		aria-hidden="true"
 	>
 		<circle cx="12" cy="12" r="4"></circle>
@@ -35,15 +50,25 @@
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"
-		class="hidden h-[1.15rem] w-[1.15rem] transition-transform duration-500 group-hover:-rotate-12 dark:block text-amber-400"
+		class="hidden h-[1.15rem] w-[1.15rem] shrink-0 transition-transform duration-500 group-hover:-rotate-12 dark:block text-amber-400"
 		aria-hidden="true"
 	>
 		<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
 		<path d="M19 3v4M21 5h-4" stroke-width="1.5"></path>
 	</svg>
+
+	{
+		showLabel && (
+			<span class="theme-toggle-label select-none">
+				<span class="dark:hidden">港区 · 白昼</span>
+				<span class="hidden dark:inline">圣杯 · 深夜</span>
+			</span>
+		)
+	}
 </button>
 
 <script>
+	// 兼容两种环境：前台（View Transitions 软导航）与后台/登录页（无 ClientRouter 的整页加载）
 	const initThemeToggle = () => {
 		const btn = document.getElementById('theme-toggle');
 		if (!btn) return;
@@ -52,5 +77,10 @@
 			localStorage.setItem('theme', isDark ? 'dark' : 'light');
 		});
 	};
-	document.addEventListener('astro:page-load', initThemeToggle);
+	// 防重复绑定：同一文档只挂一次
+	if (!document.documentElement.dataset.themeToggleReady) {
+		document.documentElement.dataset.themeToggleReady = '1';
+		initThemeToggle();
+		document.addEventListener('astro:page-load', initThemeToggle);
+	}
 </script>
