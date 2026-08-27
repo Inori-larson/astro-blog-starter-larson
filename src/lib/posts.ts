@@ -2,6 +2,9 @@ import { and, desc, eq, gt, isNull, lt, ne, sql } from 'drizzle-orm';
 import { posts, postTags, tags } from '../db/schema';
 import type { Db } from './db';
 
+/** 标签分隔符（ASCII unit separator，标签名中不会出现；作为 SQL 参数传入避免模板转义问题） */
+const TAG_SEP = '\x1f';
+
 export interface PostListItem {
 	id: number;
 	slug: string;
@@ -31,7 +34,7 @@ export async function listPosts(db: Db): Promise<PostListItem[]> {
 			publishedAt: posts.publishedAt,
 			readingMinutes: posts.readingMinutes,
 			tags: sql<string>`(
-				select group_concat(t.name, '\x1f')
+				select group_concat(t.name, ${TAG_SEP})
 				from post_tags pt join tags t on t.id = pt.tag_id
 				where pt.post_id = ${posts.id}
 			)`,
@@ -42,7 +45,7 @@ export async function listPosts(db: Db): Promise<PostListItem[]> {
 
 	return rows.map((r) => ({
 		...r,
-		tags: r.tags ? r.tags.split('\x1f') : [],
+		tags: r.tags ? r.tags.split(TAG_SEP) : [],
 	}));
 }
 
@@ -61,7 +64,7 @@ export async function getPostBySlug(db: Db, slug: string): Promise<PostDetail | 
 			updatedAt: posts.updatedAt,
 			readingMinutes: posts.readingMinutes,
 			tags: sql<string>`(
-				select group_concat(t.name, '\x1f')
+				select group_concat(t.name, ${TAG_SEP})
 				from post_tags pt join tags t on t.id = pt.tag_id
 				where pt.post_id = ${posts.id}
 			)`,
@@ -154,17 +157,14 @@ export async function getRelated(
 	}));
 }
 
-/** 标签 → 计数 */
+/** 标签 → 计数（仅统计已发布未删除文章） */
 export async function listTagCounts(db: Db): Promise<{ name: string; count: number }[]> {
 	const rows = await db
-		.select({
-			name: tags.name,
-			count: sql<number>`(
-				select count(*)
-				from post_tags pt join posts p on p.id = pt.post_id
-				where pt.tag_id = ${tags.id} and p.status = 'published' and p.deleted_at is null
-			)`,
-		})
+		.select({ name: tags.name, count: sql<number>`(
+			select count(*)
+			from post_tags pt join posts p on p.id = pt.post_id
+			where pt.tag_id = ${tags.id} and p.status = 'published' and p.deleted_at is null
+		)` })
 		.from(tags);
 
 	return rows
@@ -191,7 +191,7 @@ export async function listSearchDocs(
 			contentMd: posts.contentMd,
 			publishedAt: posts.publishedAt,
 			tags: sql<string>`(
-				select group_concat(t.name, '\x1f')
+				select group_concat(t.name, ${TAG_SEP})
 				from post_tags pt join tags t on t.id = pt.tag_id
 				where pt.post_id = ${posts.id}
 			)`,
@@ -200,5 +200,5 @@ export async function listSearchDocs(
 		.where(and(eq(posts.status, 'published'), isNull(posts.deletedAt)))
 		.orderBy(desc(posts.publishedAt));
 
-	return rows.map((r) => ({ ...r, tags: r.tags ? r.tags.split('\x1f') : [] }));
+	return rows.map((r) => ({ ...r, tags: r.tags ? r.tags.split(TAG_SEP) : [] }));
 }
