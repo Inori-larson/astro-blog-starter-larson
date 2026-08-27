@@ -7,7 +7,7 @@ import { projects } from '../data/projects';
 import { getDb } from '../lib/db';
 import { cached } from '../lib/cache';
 import { listPosts, listTagCounts } from '../lib/posts';
-import { getSiteSettings, styledStyle, renderMultiline } from '../lib/settings';
+import { getSiteSettings, styledStyle, renderRichText } from '../lib/settings';
 
 const db = getDb(Astro);
 const site = await getSiteSettings(Astro, db);
@@ -61,7 +61,7 @@ const featuredProjects = projects.filter((p) => p.featured);
 			<p
 				class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400"
 				style={styledStyle(site.heroBio)}
-				set:html={renderMultiline(site.heroBio)}
+				set:html={renderRichText(site.heroBio.text)}
 			>
 			</p>
 

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getDb } from '../lib/db';
-import { getSiteSettings, renderAboutParagraph, renderMultiline, styledStyle } from '../lib/settings';
+import { getSiteSettings, renderAboutParagraph, renderRichText, styledStyle } from '../lib/settings';
 
 export const prerender = false;
 
@@ -88,7 +88,7 @@ const bioParagraphs = site.aboutBio.text
 			class="reveal mt-14 rounded-3xl border border-zinc-200/70 bg-gradient-to-br from-brand-50/80 to-fuchsia-50/60 p-8 text-center dark:border-zinc-800/70 dark:from-brand-900/20 dark:to-fuchsia-900/10"
 		>
 			<h2 class="text-lg font-bold text-zinc-900 dark:text-white" style={styledStyle(site.aboutContactTitle)}>{site.aboutContactTitle.text}</h2>
-			<p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400" style={styledStyle(site.aboutContactDesc)} set:html={renderMultiline(site.aboutContactDesc)}>
+			<p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400" style={styledStyle(site.aboutContactDesc)} set:html={renderRichText(site.aboutContactDesc.text)}>
 			</p>
 			<div class="mt-5 flex flex-wrap items-center justify-center gap-3">
 				{

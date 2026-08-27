@@ -180,9 +180,11 @@ function escapeHtml(s: string): string {
 	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/** 单段多行文案：转义后换行转 <br /> */
-export function renderMultiline(s: StyledText): string {
-	return escapeHtml(s.text).replace(/\n/g, '<br />');
+/** 富文本：转义 HTML → **粗体** → 换行转 <br />（首页简介、联系描述等单字段用） */
+export function renderRichText(text: string): string {
+	return escapeHtml(text)
+		.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+		.replace(/\n/g, '<br />');
 }
 
 /** 关于页段落渲染：转义 HTML → **粗体** → {name} 占位替换 → 换行转 <br /> */
