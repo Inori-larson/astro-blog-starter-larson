@@ -185,12 +185,54 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 						<StyleControls field="aboutContactDesc" multiline />
 						<p class="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-600">回车换行；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">**文字**</code> 加粗。</p>
 					</div>
-					<div>
-						<label class={labelCls} for="f-contact-email">联系邮箱（留空则隐藏邮件按钮）</label>
-						<input id="f-contact-email" type="text" placeholder="you@example.com" class={`mt-1.5 ${inputCls}`} />
+				<div>
+					<label class={labelCls} for="f-contact-email">联系邮箱（留空则隐藏邮件按钮）</label>
+					<input id="f-contact-email" type="text" placeholder="you@example.com" class={`mt-1.5 ${inputCls}`} />
+				</div>
+			</div>
+		</section>
+
+		<!-- 页脚 -->
+		<section class="rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+			<h2 class="text-sm font-bold text-zinc-900 dark:text-white">页脚</h2>
+			<div class="mt-4 space-y-4">
+				<div>
+					<label class={labelCls} for="f-footer-title">页脚博客名（留空则跟随站点标题）</label>
+					<input id="f-footer-title" type="text" placeholder="留空 = 站点标题" class={`mt-1.5 ${inputCls}`} />
+				</div>
+				<div>
+					<label class={labelCls} for="f-footer-logo">页脚 Logo（留空则跟随站点 Logo）</label>
+					<div class="mt-1.5 flex items-center gap-3">
+						<div class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800" data-logo-preview>
+							<span class="text-sm font-bold text-zinc-400 dark:text-zinc-500">–</span>
+						</div>
+						<input id="f-footer-logo" type="text" placeholder="/media/uploads/… 或 https://…" class="h-10 min-w-0 flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+						<div class="flex shrink-0 gap-2">
+							<button
+								type="button"
+								data-upload="f-footer-logo"
+								class="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-600 transition-colors hover:border-brand-400 hover:text-brand-600 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-brand-500 dark:hover:text-brand-400"
+							>
+								上传
+							</button>
+							<button
+								type="button"
+								data-clear="f-footer-logo"
+								class="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-semibold text-zinc-400 transition-colors hover:border-rose-300 hover:text-rose-500 dark:border-zinc-700"
+							>
+								清除
+							</button>
+						</div>
 					</div>
 				</div>
-			</section>
+				<div data-style-group="footerBio">
+					<label class={labelCls} for="f-footer-bio">页脚文字介绍</label>
+					<textarea id="f-footer-bio" rows="4" class={`mt-1.5 ${textareaCls}`}></textarea>
+					<StyleControls field="footerBio" multiline />
+					<p class="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-600">回车换行；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">**文字**</code> 加粗；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">&#123;name&#125;</code> 会替换为站长名称。</p>
+				</div>
+			</div>
+		</section>
 		</form>
 
 		<!-- 隐藏的文件选择（Logo / 头像上传共用） -->
@@ -233,6 +275,9 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 			aboutContactTitle: StyledText;
 			aboutContactDesc: StyledText;
 			aboutContactEmail: string;
+			footerTitle: string;
+			footerLogo: string;
+			footerBio: StyledText;
 		}
 
 		const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -250,6 +295,7 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 			'aboutBio',
 			'aboutContactTitle',
 			'aboutContactDesc',
+			'footerBio',
 		] as const;
 
 		/* ---------- 文案样式控件（字体 / 颜色）绑定 ---------- */
@@ -356,7 +402,7 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 			if (file && pendingUploadTarget) void uploadImage(file, pendingUploadTarget);
 			input.value = '';
 		});
-		for (const id of ['f-site-logo', 'f-owner-avatar']) {
+		for (const id of ['f-site-logo', 'f-owner-avatar', 'f-footer-logo']) {
 			$(id).addEventListener('input', () => refreshPreview(id));
 		}
 
@@ -411,6 +457,8 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 			fill('f-site-title', data.siteTitle);
 			fill('f-site-logo', data.siteLogo);
 			fill('f-owner-avatar', data.ownerAvatar);
+			fill('f-footer-title', data.footerTitle);
+			fill('f-footer-logo', data.footerLogo);
 			fill('f-about-badges', data.aboutBadges.join(', '));
 			fill('f-contact-email', data.aboutContactEmail);
 			for (const field of STYLED_FIELDS) {
@@ -418,6 +466,7 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 			}
 			refreshPreview('f-site-logo');
 			refreshPreview('f-owner-avatar');
+			refreshPreview('f-footer-logo');
 			for (const item of data.aboutTimeline) addTimelineRow(item);
 		}
 
@@ -427,6 +476,8 @@ const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 				siteTitle: val('f-site-title'),
 				siteLogo: val('f-site-logo'),
 				ownerAvatar: val('f-owner-avatar'),
+				footerTitle: val('f-footer-title'),
+				footerLogo: val('f-footer-logo'),
 				aboutBadges: val('f-about-badges'),
 				aboutContactEmail: val('f-contact-email'),
 			};

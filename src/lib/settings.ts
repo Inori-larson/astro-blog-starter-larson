@@ -54,6 +54,12 @@ export interface SiteSettings {
 	aboutContactTitle: StyledText;
 	aboutContactDesc: StyledText;
 	aboutContactEmail: string;
+	/** 页脚博客名（空则跟随站点标题） */
+	footerTitle: string;
+	/** 页脚 Logo（空则跟随站点 Logo） */
+	footerLogo: string;
+	/** 页脚文字介绍 */
+	footerBio: StyledText;
 }
 
 /** 初始文案 = 当前写死在页面里的内容，未入库时兜底 */
@@ -80,6 +86,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 	aboutContactTitle: st('想和我聊聊？'),
 	aboutContactDesc: st('无论是技术交流、合作意向，还是单纯打个招呼，都欢迎随时联系。'),
 	aboutContactEmail: '935636808@qq.com',
+	footerTitle: '',
+	footerLogo: '',
+	footerBio: st('{name} 的数字自留地。记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。'),
 };
 
 /** 可样式化字段 → settings 表基础键（颜色/字体存 `${key}_color` / `${key}_font`） */
@@ -93,6 +102,7 @@ const STYLED_KEYS = {
 	aboutBio: 'site.about_bio',
 	aboutContactTitle: 'site.about_contact_title',
 	aboutContactDesc: 'site.about_contact_desc',
+	footerBio: 'site.footer_bio',
 } as const;
 type StyledField = keyof typeof STYLED_KEYS;
 
@@ -100,6 +110,8 @@ const SIMPLE_KEYS = {
 	siteTitle: 'site.title',
 	siteLogo: 'site.logo',
 	ownerAvatar: 'site.owner_avatar',
+	footerTitle: 'site.footer_title',
+	footerLogo: 'site.footer_logo',
 } as const;
 
 const BADGE_KEY = 'site.about_badges';
@@ -127,6 +139,8 @@ async function readSiteSettings(db: ReturnType<typeof getDb>): Promise<SiteSetti
 	for (const [field, key] of Object.entries(SIMPLE_KEYS) as [keyof typeof SIMPLE_KEYS, string][]) {
 		const raw = map.get(key);
 		if (raw !== undefined && raw !== '') result[field] = raw;
+		// 回退开关：显式存 'inherit' 表示清空回退到站点级值
+		if (raw === 'inherit') result[field] = '';
 	}
 
 	for (const [field, key] of Object.entries(STYLED_KEYS) as [StyledField, string][]) {
@@ -209,12 +223,14 @@ const STYLED_REQUIRED: { field: StyledField; label: string; max: number }[] = [
 	{ field: 'aboutBio', label: '关于页简介', max: 10000 },
 	{ field: 'aboutContactTitle', label: '联系标题', max: 200 },
 	{ field: 'aboutContactDesc', label: '联系描述', max: 1000 },
+	{ field: 'footerBio', label: '页脚介绍', max: 2000 },
 ];
 
 /** 图片类设置：可为空；非空时必须是 http(s) 或站内 /media/ 开头的 URL */
-const OPTIONAL_IMAGE_FIELDS: { field: 'siteLogo' | 'ownerAvatar'; label: string }[] = [
+const OPTIONAL_IMAGE_FIELDS: { field: 'siteLogo' | 'ownerAvatar' | 'footerLogo'; label: string }[] = [
 	{ field: 'siteLogo', label: '站点 Logo' },
 	{ field: 'ownerAvatar', label: '站长头像' },
+	{ field: 'footerLogo', label: '页脚 Logo' },
 ];
 
 /** 兼容旧客户端的纯字符串输入 → StyledText */
@@ -236,6 +252,9 @@ export function normalizeSiteSettings(input: unknown): NormalizeResult {
 	const siteTitle = typeof obj.siteTitle === 'string' ? obj.siteTitle.trim() : '';
 	if (!siteTitle) return { ok: false, error: '「站点标题」不能为空' };
 	value.siteTitle = siteTitle.slice(0, 100);
+
+	// 页脚博客名：可空（回退站点标题）
+	value.footerTitle = typeof obj.footerTitle === 'string' ? obj.footerTitle.trim().slice(0, 100) : '';
 
 	for (const { field, label, max } of STYLED_REQUIRED) {
 		const raw = toStyled(obj[field]);
@@ -302,6 +321,9 @@ export function serializeSettings(s: SiteSettings): { key: string; value: string
 		{ key: 'site.title', value: s.siteTitle },
 		{ key: SIMPLE_KEYS.siteLogo, value: s.siteLogo },
 		{ key: SIMPLE_KEYS.ownerAvatar, value: s.ownerAvatar },
+		// 页脚回退字段：空值写 'inherit' 标记，读取时回退到站点级
+		{ key: SIMPLE_KEYS.footerTitle, value: s.footerTitle || 'inherit' },
+		{ key: SIMPLE_KEYS.footerLogo, value: s.footerLogo || 'inherit' },
 	];
 	for (const [field, key] of Object.entries(STYLED_KEYS) as [StyledField, string][]) {
 		rows.push({ key, value: s[field].text });
