@@ -92,6 +92,25 @@
 
 <!-- ==================== Fate（暗色）装饰 ==================== -->
 <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden hidden dark:block" aria-hidden="true">
+	<!-- 立绘背景图（暗色模式）：底图 + 深色渐变遮罩（黑金氛围，保证金色文字可读） -->
+	<div
+		class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+		style="background-image: url('https://blog.larson.it.com/media/uploads/2026-08-27/ba53beb9-big-_-jpg.webp');"
+	>
+	</div>
+	<!-- 可读性遮罩：深渊黑渐变，顶部透出立绘，内容区深沉 -->
+	<div
+		class="absolute inset-0"
+		style="background: linear-gradient(to bottom, rgba(20,16,12,0.38) 0%, rgba(20,16,12,0.62) 40%, rgba(20,16,12,0.85) 100%);"
+	>
+	</div>
+	<!-- 圣杯夜色晕染（边缘向中心压暗） -->
+	<div
+		class="absolute inset-0"
+		style="background: radial-gradient(ellipse 120% 90% at 50% 30%, transparent 55%, rgba(20,16,12,0.55) 100%);"
+	>
+	</div>
+
 	<!-- 右下：大魔术阵（三层同心圆 + 卢恩符文 + 六芒星） -->
 	<svg class="absolute -right-24 -bottom-24 h-[30rem] w-[30rem] opacity-[0.13]" viewBox="0 0 400 400" fill="none" stroke="#d4af37" stroke-width="1.2">
 		<circle cx="200" cy="200" r="190"></circle>
