@@ -2,13 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import StatusBadge from '../components/StatusBadge.astro';
-import { SITE_TITLE, SITE_DESCRIPTION, AUTHOR_NAME } from '../consts';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { projects } from '../data/projects';
 import { getDb } from '../lib/db';
 import { cached } from '../lib/cache';
 import { listPosts, listTagCounts } from '../lib/posts';
+import { getSiteSettings } from '../lib/settings';
 
 const db = getDb(Astro);
+const site = await getSiteSettings(Astro, db);
 const posts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
 const tagCountsList = await cached(Astro, 'tags:counts', 300, () => listTagCounts(db));
 const allTags = tagCountsList.map((t) => t.name);
@@ -50,17 +52,17 @@ const featuredProjects = projects.filter((p) => p.featured);
 			<h1
 				class="reveal is-visible mx-auto mt-6 max-w-3xl text-4xl leading-tight font-bold tracking-tight text-zinc-900 sm:text-5xl md:text-6xl dark:text-zinc-100"
 			>
-				你好，我是
-				<span class="text-gradient">{AUTHOR_NAME}</span>
+				{site.heroGreeting}
+				<span class="text-gradient">{site.heroName}</span>
 				<br class="hidden sm:block" />
-				<span class="dark:hidden">欢迎回到港区</span>
-				<span class="hidden dark:inline">圣杯问答，今夜开始</span>
+				<span class="dark:hidden">{site.heroTaglineLight}</span>
+				<span class="hidden dark:inline">{site.heroTaglineDark}</span>
 			</h1>
 
 			<p
 				class="reveal is-visible mx-auto mt-6 max-w-xl text-base leading-relaxed text-zinc-500 sm:text-lg dark:text-zinc-400"
 			>
-				一名爱写代码也爱写文字的开发者。在这里记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
+				{site.heroBio}
 			</p>
 
 			<div class="reveal is-visible mt-9 flex flex-wrap items-center justify-center gap-3">
