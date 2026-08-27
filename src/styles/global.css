@@ -411,13 +411,15 @@ pre:hover .code-copy,
 }
 
 .dark {
-	/* Fate：金色描边 + 暗底 */
-	--cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M4 2 L4 22 L9.5 17 L13 25 L16.5 23.5 L13 16 L20.5 16 Z' fill='%231c1610' stroke='%23d4af37' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M6 4 L6 18' stroke='%23a61e2b' stroke-width='1' opacity='0.6'/%3E%3C/svg%3E")
-		4 2, default;
-	--cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 3 a2.6 2.6 0 1 0 0.001 0 Z M15 6 v14 M8 11 h-2.2 a9.3 9.3 0 0 0 18.4 0 H22 M11 8.5 h8' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='15' cy='3.5' r='2.6' fill='%231c1610' stroke='%23d4af37' stroke-width='1.6'/%3E%3C/svg%3E")
-		15 3, pointer;
-	--cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28' viewBox='0 0 20 28'%3E%3Cpath d='M10 3 v22 M6 6 h8 M6 22 h8' stroke='%23e8c96a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
-		10 14, text;
+	/* Fate：王之剑形箭头（金刃 + 血红剑脊 + 暗底护手） */
+	--cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 1 L17.2 5 L17.2 18 L15 20 L12.8 18 L12.8 5 Z' fill='%23d4af37' stroke='%239c7c1e' stroke-width='0.8'/%3E%3Cpath d='M15 3 L15 19' stroke='%23a61e2b' stroke-width='1.4'/%3E%3Cpath d='M8.5 20.5 h13' stroke='%23d4af37' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M15 21 L15 26 M12.8 26 h4.4' stroke='%23d4af37' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='15' cy='28' r='1.6' fill='%23a61e2b'/%3E%3C/svg%3E")
+		15 2, default;
+	/* 指示（可点击）：令咒印记（Saber 左臂三划，金红双色） */
+	--cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 4 C13 8 13 11 15 14 C17 11 17 8 15 4 Z' fill='%23d4af37' stroke='%239c7c1e' stroke-width='0.7'/%3E%3Cpath d='M8.5 9 C9 13 11 15.5 14 16.5 C13.5 13 12 11 8.5 9 Z' fill='%23a61e2b' stroke='%23701218' stroke-width='0.7'/%3E%3Cpath d='M21.5 9 C21 13 19 15.5 16 16.5 C16.5 13 18 11 21.5 9 Z' fill='%23a61e2b' stroke='%23701218' stroke-width='0.7'/%3E%3Cpath d='M10 21 C11.5 23.5 13 24.5 15 25 C17 24.5 18.5 23.5 20 21' fill='none' stroke='%23d4af37' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E")
+		15 5, pointer;
+	/* 文本插入：魔术回路刻痕（金色回路节点） */
+	--cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='28' viewBox='0 0 22 28'%3E%3Cpath d='M11 3 v22' stroke='%23d4af37' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M7 5.5 l8 3 M7 8.5 l8 3' stroke='%23a61e2b' stroke-width='1.1' stroke-linecap='round' opacity='0.85'/%3E%3Cpath d='M7 22.5 l8 -3 M7 19.5 l8 -3' stroke='%23a61e2b' stroke-width='1.1' stroke-linecap='round' opacity='0.85'/%3E%3Ccircle cx='11' cy='3' r='1.4' fill='%23d4af37'/%3E%3Ccircle cx='11' cy='25' r='1.4' fill='%23d4af37'/%3E%3C/svg%3E")
+		11 14, text;
 }
 
 /* 应用到全局（按钮/链接等可交互元素用 pointer 形态） */
