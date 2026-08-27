@@ -159,13 +159,16 @@ export async function getRelated(
 
 /** 标签 → 计数（仅统计已发布未删除文章） */
 export async function listTagCounts(db: Db): Promise<{ name: string; count: number }[]> {
-	const rows = await db
-		.select({ name: tags.name, count: sql<number>`(
+	// 注意:drizzle 模板列引用会生成无表限定的 "id"，在子查询里被 SQLite 解析为内层表列，
+	// 因此这里手写全限定列名
+	const rows = await db.all<{ name: string; count: number }>(sql`
+		select t.name as name, (
 			select count(*)
 			from post_tags pt join posts p on p.id = pt.post_id
-			where pt.tag_id = ${tags.id} and p.status = 'published' and p.deleted_at is null
-		)` })
-		.from(tags);
+			where pt.tag_id = t.id and p.status = 'published' and p.deleted_at is null
+		) as count
+		from tags t
+	`);
 
 	return rows
 		.map((r) => ({ name: r.name, count: Number(r.count) }))
