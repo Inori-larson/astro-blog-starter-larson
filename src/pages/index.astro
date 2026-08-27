@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import StatusBadge from '../components/StatusBadge.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { SITE_DESCRIPTION } from '../consts';
 import { projects } from '../data/projects';
 import { getDb } from '../lib/db';
 import { cached } from '../lib/cache';
@@ -19,7 +19,7 @@ const [featured, ...rest] = posts;
 const featuredProjects = projects.filter((p) => p.featured);
 ---
 
-<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<BaseLayout description={SITE_DESCRIPTION}>
 	<!-- Hero -->
 	<section class="relative overflow-hidden">
 		<!-- 装饰光斑 -->

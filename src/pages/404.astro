@@ -1,11 +1,11 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE_TITLE } from '../consts';
 
-export const prerender = true;
+
+export const prerender = false;
 ---
 
-<BaseLayout title={`页面不存在 · ${SITE_TITLE}`} description="404 - 页面不存在">
+<BaseLayout title="页面不存在" description="404 - 页面不存在">
 	<section class="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32">
 		<div
 			class="pointer-events-none absolute top-1/2 left-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/10 blur-3xl"

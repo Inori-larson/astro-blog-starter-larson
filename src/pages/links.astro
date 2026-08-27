@@ -1,12 +1,12 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { friendLinks } from '../data/links';
-import { SITE_TITLE } from '../consts';
 
-export const prerender = true;
+
+export const prerender = false;
 ---
 
-<BaseLayout title={`友链 · ${SITE_TITLE}`} description="我常逛的站点与朋友们">
+<BaseLayout title="友链" description="我常逛的站点与朋友们">
 	<section class="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
 		<header class="reveal is-visible">
 			<h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">

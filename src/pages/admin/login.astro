@@ -1,6 +1,7 @@
 ---
-import { SITE_TITLE, AUTHOR_NAME } from '../../consts';
 import { getSessionFromRequest } from '../../lib/auth';
+import { getDb } from '../../lib/db';
+import { getSiteSettings } from '../../lib/settings';
 import WorldDecor from '../../components/WorldDecor.astro';
 import ThemeToggle from '../../components/ThemeToggle.astro';
 
@@ -14,6 +15,10 @@ try {
 	// AUTH_SECRET 未配置时视为未登录
 }
 if (session) return Astro.redirect('/admin/');
+
+const db = getDb(Astro);
+const site = await getSiteSettings(Astro, db);
+const logoLetter = [...site.siteTitle.trim()][0]?.toUpperCase() ?? 'B';
 ---
 
 <!doctype html>
@@ -22,7 +27,7 @@ if (session) return Astro.redirect('/admin/');
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<meta name="robots" content="noindex" />
-		<title>登录 · 后台管理 · {SITE_TITLE}</title>
+		<title>登录 · 后台管理 · {site.siteTitle}</title>
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<style is:global>
 			@import '../../styles/global.css';
@@ -69,18 +74,24 @@ if (session) return Astro.redirect('/admin/');
 
 		<!-- 品牌区 -->
 		<header class="text-center">
-				<span
-					class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-2xl font-bold text-white shadow-xl shadow-brand-500/30"
-					aria-hidden="true"
-				>
-					L
-				</span>
+				{
+					site.siteLogo ? (
+						<img src={site.siteLogo} alt={site.siteTitle} class="mx-auto h-14 w-14 rounded-2xl object-cover shadow-xl shadow-brand-500/30" width="56" height="56" />
+					) : (
+						<span
+							class="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-2xl font-bold text-white shadow-xl shadow-brand-500/30"
+							aria-hidden="true"
+						>
+							{logoLetter}
+						</span>
+					)
+				}
 				<h1 class="mt-5 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
 					<span class="dark:hidden">欢迎回到港区，指挥官</span>
 					<span class="hidden dark:inline">令咒已就绪，御主</span>
 				</h1>
 				<p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-					登录 {SITE_TITLE} 后台，继续你的创作
+					登录 {site.siteTitle} 后台，继续你的创作
 				</p>
 			</header>
 
@@ -269,7 +280,7 @@ if (session) return Astro.redirect('/admin/');
 					返回博客首页
 				</a>
 				<span aria-hidden="true">·</span>
-				<span>© {new Date().getFullYear()} {AUTHOR_NAME}</span>
+				<span>© {new Date().getFullYear()} {site.heroName}</span>
 			</footer>
 		</div>
 

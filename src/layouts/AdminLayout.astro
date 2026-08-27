@@ -1,13 +1,18 @@
 ---
-import { SITE_TITLE } from '../../consts';
 import WorldDecor from '../components/WorldDecor.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import { getDb } from '../lib/db';
+import { getSiteSettings } from '../lib/settings';
 
 interface Props {
 	title: string;
 }
 
 const { title } = Astro.props;
+
+const db = getDb(Astro);
+const site = await getSiteSettings(Astro, db);
+const logoLetter = [...site.siteTitle.trim()][0]?.toUpperCase() ?? 'B';
 ---
 
 <!doctype html>
@@ -36,13 +41,19 @@ const { title } = Astro.props;
 		<div class="relative z-10 flex min-h-screen">
 			<!-- 侧边栏 -->
 			<aside class="fixed inset-y-0 left-0 z-30 flex w-56 flex-col border-r border-zinc-200/70 bg-white/90 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/90">
-				<a href="/admin/" class="flex h-16 items-center gap-2.5 border-b border-zinc-200/70 px-5 dark:border-zinc-800">
-					<span
-						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
-						aria-hidden="true">L</span
-					>
-					<span class="text-sm font-bold text-zinc-900 dark:text-white">后台管理</span>
-				</a>
+			<a href="/admin/" class="flex h-16 items-center gap-2.5 border-b border-zinc-200/70 px-5 dark:border-zinc-800">
+				{
+					site.siteLogo ? (
+						<img src={site.siteLogo} alt={site.siteTitle} class="h-8 w-8 rounded-lg object-cover" width="32" height="32" />
+					) : (
+						<span
+							class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
+							aria-hidden="true">{logoLetter}</span
+						>
+					)
+				}
+				<span class="text-sm font-bold text-zinc-900 dark:text-white">后台管理</span>
+			</a>
 				<nav class="flex-1 space-y-0.5 px-3 py-4 text-sm" data-admin-nav>
 					{
 						[

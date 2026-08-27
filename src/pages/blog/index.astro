@@ -1,7 +1,7 @@
----
+﻿---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import { SITE_DESCRIPTION } from '../../consts';
 import { getDb } from '../../lib/db';
 import { cached } from '../../lib/cache';
 import { listPosts, listTagCounts } from '../../lib/posts';
@@ -12,7 +12,7 @@ const tagCountsList = await cached(Astro, 'tags:counts', 300, () => listTagCount
 const allTags = tagCountsList.map((t) => t.name);
 ---
 
-<BaseLayout title={`博客 · ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+<BaseLayout title="博客" description={SITE_DESCRIPTION}>
 	<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
 		<header class="reveal is-visible">
 			<h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">

@@ -6,9 +6,12 @@ import SearchModal from '../components/SearchModal.astro';
 import BackToTop from '../components/BackToTop.astro';
 import WorldDecor from '../components/WorldDecor.astro';
 import { ClientRouter } from 'astro:transitions';
+import { getDb } from '../lib/db';
+import { getSiteSettings } from '../lib/settings';
 
 interface Props {
-	title: string;
+	/** 页面标题（不含站点后缀，由布局统一拼接「页面 · 站点标题」；首页留空） */
+	title?: string;
 	description: string;
 	image?: string;
 	/** 额外注入到 body 之后的页面元素（如阅读进度条） */
@@ -16,22 +19,26 @@ interface Props {
 }
 
 const { title, description, image, class: className } = Astro.props;
+
+const db = getDb(Astro);
+const site = await getSiteSettings(Astro, db);
+const fullTitle = title ? `${title} · ${site.siteTitle}` : site.siteTitle;
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={title} description={description} image={image} />
+		<BaseHead title={fullTitle} description={description} image={image} />
 		<ClientRouter />
 	</head>
 	<body class:list={['relative flex min-h-screen flex-col', className]}>
 		<WorldDecor />
 		<div class="relative z-10 flex min-h-screen flex-col">
-			<Header />
+			<Header site={site} />
 			<main class="flex-1">
 				<slot />
 			</main>
-			<Footer />
+			<Footer site={site} />
 		</div>
 		<BackToTop />
 		<SearchModal />

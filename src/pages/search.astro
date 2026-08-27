@@ -1,11 +1,11 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE_TITLE } from '../consts';
 
-export const prerender = true;
+
+export const prerender = false;
 ---
 
-<BaseLayout title={`搜索 · ${SITE_TITLE}`} description="搜索全站文章">
+<BaseLayout title="搜索" description="搜索全站文章">
 	<section class="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
 		<header class="reveal is-visible text-center">
 			<h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">

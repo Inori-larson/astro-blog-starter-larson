@@ -1,16 +1,16 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import { projects } from '../data/projects';
-import { SITE_TITLE } from '../consts';
 
-export const prerender = true;
+
+export const prerender = false;
 
 const featured = projects.filter((p) => p.featured);
 const rest = projects.filter((p) => !p.featured);
 ---
 
-<BaseLayout title={`项目 · ${SITE_TITLE}`} description="我正在做或已经完成的开源项目与产品">
+<BaseLayout title="项目" description="我正在做或已经完成的开源项目与产品">
 	<section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
 		<header class="reveal is-visible">
 			<h1 class="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">

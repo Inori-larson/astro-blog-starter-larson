@@ -1,6 +1,13 @@
 ---
-import { SITE_TITLE, AUTHOR_NAME } from '../consts';
 import SubscribeBox from './SubscribeBox.astro';
+import type { SiteSettings } from '../lib/settings';
+
+interface Props {
+	site: SiteSettings;
+}
+
+const { site } = Astro.props;
+const logoLetter = [...site.siteTitle.trim()][0]?.toUpperCase() ?? 'B';
 
 const today = new Date();
 const year = today.getFullYear();
@@ -12,16 +19,22 @@ const year = today.getFullYear();
 			<!-- 品牌区 -->
 			<div class="max-w-xs">
 				<div class="flex items-center gap-2.5">
-					<span
-						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
-						aria-hidden="true"
-					>
-						L
-					</span>
-					<span class="font-bold text-zinc-900 dark:text-white">{SITE_TITLE}</span>
+					{
+						site.siteLogo ? (
+							<img src={site.siteLogo} alt={site.siteTitle} class="h-8 w-8 rounded-lg object-cover" width="32" height="32" />
+						) : (
+							<span
+								class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 via-sky-500 to-cyan-400 text-sm font-bold text-white"
+								aria-hidden="true"
+							>
+								{logoLetter}
+							</span>
+						)
+					}
+					<span class="font-bold text-zinc-900 dark:text-white">{site.siteTitle}</span>
 				</div>
 			<p class="mt-3 text-sm leading-relaxed text-zinc-500 dark:text-zinc-500">
-				{AUTHOR_NAME} 的数字自留地。记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
+				{site.heroName} 的数字自留地。记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
 			</p>
 			<SubscribeBox />
 		</div>
@@ -48,9 +61,9 @@ const year = today.getFullYear();
 		<div
 			class="mt-10 flex flex-col items-center justify-between gap-2 border-t border-zinc-200/70 pt-6 text-xs text-zinc-400 sm:flex-row dark:border-zinc-800/70 dark:text-zinc-500"
 		>
-			<span>&copy; {year} {AUTHOR_NAME}。保留所有权利。</span>
+			<span>&copy; {year} {site.heroName}。保留所有权利。</span>
 			<span>
-				由 {AUTHOR_NAME} 设计与构建
+				由 {site.heroName} 设计与构建
 			</span>
 		</div>
 	</div>

@@ -16,6 +16,12 @@ export interface TimelineItem {
 }
 
 export interface SiteSettings {
+	/** 站点标题（浏览器标签、导航栏、RSS） */
+	siteTitle: string;
+	/** 站点 Logo（R2 图片 URL，空则用标题首字母渐变块） */
+	siteLogo: string;
+	/** 站长头像（R2 图片 URL，空则用名称首字母渐变圆） */
+	ownerAvatar: string;
 	heroGreeting: string;
 	heroName: string;
 	heroTaglineLight: string;
@@ -32,6 +38,9 @@ export interface SiteSettings {
 
 /** 初始文案 = 当前写死在页面里的内容，未入库时兜底 */
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+	siteTitle: "Larson's Blog",
+	siteLogo: '',
+	ownerAvatar: '',
 	heroGreeting: '你好，我是',
 	heroName: 'Larson',
 	heroTaglineLight: '欢迎回到港区',
@@ -53,6 +62,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 };
 
 const TEXT_KEYS = {
+	siteTitle: 'site.title',
+	siteLogo: 'site.logo',
+	ownerAvatar: 'site.owner_avatar',
 	heroGreeting: 'site.hero_greeting',
 	heroName: 'site.hero_name',
 	heroTaglineLight: 'site.hero_tagline_light',
@@ -68,34 +80,40 @@ const TEXT_KEYS = {
 const BADGE_KEY = 'site.about_badges';
 const TIMELINE_KEY = 'site.about_timeline';
 
-/** 读取站点设置（KV 缓存 5 分钟，保存时主动失效） */
+/** 读取站点设置（KV 缓存 5 分钟，保存时主动失效；任何异常回退默认值，不阻塞页面渲染） */
 export async function getSiteSettings(ctx: { locals: App.Locals }, db: ReturnType<typeof getDb>): Promise<SiteSettings> {
-	return cached(ctx, 'settings:site', 300, async () => {
-		const rows = await db
-			.select({ key: settings.key, value: settings.value })
-			.from(settings)
-			.where(like(settings.key, 'site.%'));
-		const map = new Map(rows.map((r) => [r.key, r.value]));
-		const result: SiteSettings = { ...DEFAULT_SITE_SETTINGS };
-		for (const [field, key] of Object.entries(TEXT_KEYS)) {
-			const raw = map.get(key);
-			if (raw !== undefined && raw !== '') result[field as keyof typeof TEXT_KEYS] = raw;
-		}
-		const badges = parseJsonArray(map.get(BADGE_KEY));
-		if (badges) result.aboutBadges = badges.filter((b) => typeof b === 'string' && b.trim()).map((b) => String(b).trim()).slice(0, 20);
-		const timeline = parseJsonArray(map.get(TIMELINE_KEY));
-		if (timeline && timeline.every((t) => t && typeof t === 'object')) {
-			result.aboutTimeline = timeline
-				.map((t) => ({
-					date: String((t as TimelineItem).date ?? '').slice(0, 40),
-					title: String((t as TimelineItem).title ?? '').slice(0, 120),
-					desc: String((t as TimelineItem).desc ?? '').slice(0, 300),
-				}))
-				.filter((t) => t.title)
-				.slice(0, 30);
-		}
-		return result;
-	});
+	try {
+		return await cached(ctx, 'settings:site', 300, () => readSiteSettings(db));
+	} catch {
+		return { ...DEFAULT_SITE_SETTINGS };
+	}
+}
+
+async function readSiteSettings(db: ReturnType<typeof getDb>): Promise<SiteSettings> {
+	const rows = await db
+		.select({ key: settings.key, value: settings.value })
+		.from(settings)
+		.where(like(settings.key, 'site.%'));
+	const map = new Map(rows.map((r) => [r.key, r.value]));
+	const result: SiteSettings = { ...DEFAULT_SITE_SETTINGS };
+	for (const [field, key] of Object.entries(TEXT_KEYS)) {
+		const raw = map.get(key);
+		if (raw !== undefined && raw !== '') result[field as keyof typeof TEXT_KEYS] = raw;
+	}
+	const badges = parseJsonArray(map.get(BADGE_KEY));
+	if (badges) result.aboutBadges = badges.filter((b) => typeof b === 'string' && b.trim()).map((b) => String(b).trim()).slice(0, 20);
+	const timeline = parseJsonArray(map.get(TIMELINE_KEY));
+	if (timeline && timeline.every((t) => t && typeof t === 'object')) {
+		result.aboutTimeline = timeline
+			.map((t) => ({
+				date: String((t as TimelineItem).date ?? '').slice(0, 40),
+				title: String((t as TimelineItem).title ?? '').slice(0, 120),
+				desc: String((t as TimelineItem).desc ?? '').slice(0, 300),
+			}))
+			.filter((t) => t.title)
+			.slice(0, 30);
+	}
+	return result;
 }
 
 function parseJsonArray(raw: string | undefined): unknown[] | undefined {
@@ -124,8 +142,9 @@ export type NormalizeResult = { ok: true; value: SiteSettings } | { ok: false; e
 type TextField = { [K in keyof SiteSettings]: SiteSettings[K] extends string ? K : never }[keyof SiteSettings];
 
 const REQUIRED_TEXT: { field: TextField; label: string; max: number }[] = [
+	{ field: 'siteTitle', label: '站点标题', max: 100 },
 	{ field: 'heroGreeting', label: '问候语', max: 100 },
-	{ field: 'heroName', label: '名字', max: 60 },
+	{ field: 'heroName', label: '站长名称', max: 60 },
 	{ field: 'heroTaglineLight', label: '浅色主题口号', max: 100 },
 	{ field: 'heroTaglineDark', label: '暗色主题口号', max: 100 },
 	{ field: 'heroBio', label: '首页简介', max: 2000 },
@@ -133,6 +152,12 @@ const REQUIRED_TEXT: { field: TextField; label: string; max: number }[] = [
 	{ field: 'aboutBio', label: '关于页简介', max: 10000 },
 	{ field: 'aboutContactTitle', label: '联系标题', max: 200 },
 	{ field: 'aboutContactDesc', label: '联系描述', max: 1000 },
+];
+
+/** 图片类设置：可为空；非空时必须是 http(s) 或站内 /media/ 开头的 URL */
+const OPTIONAL_IMAGE_FIELDS: { field: TextField; label: string }[] = [
+	{ field: 'siteLogo', label: '站点 Logo' },
+	{ field: 'ownerAvatar', label: '站长头像' },
 ];
 
 /** 保存前校验与规范化：失败返回错误信息 */
@@ -146,6 +171,15 @@ export function normalizeSiteSettings(input: unknown): NormalizeResult {
 			return { ok: false, error: `「${label}」不能为空` };
 		}
 		value[field] = raw.trim().slice(0, max);
+	}
+
+	for (const { field, label } of OPTIONAL_IMAGE_FIELDS) {
+		const raw = obj[field];
+		const url = typeof raw === 'string' ? raw.trim() : '';
+		if (url && !/^(https?:\/\/|\/media\/)/.test(url)) {
+			return { ok: false, error: `「${label}」需要是 http(s) 链接或本站 /media/ 路径` };
+		}
+		value[field] = url.slice(0, 500);
 	}
 
 	const email = typeof obj.aboutContactEmail === 'string' ? obj.aboutContactEmail.trim() : '';
