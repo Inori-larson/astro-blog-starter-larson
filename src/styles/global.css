@@ -394,6 +394,61 @@ pre:hover .code-copy,
 	}
 }
 
+/* ============================== 自定义鼠标指针 ============================== */
+/* 碧蓝航线（浅色）：白色舰装光标 + 海军蓝描边；Fate（暗色）：金色魔术光标 */
+/* SVG 内联 data URI，无额外请求 */
+
+:root {
+	/* 默认箭头：流线型舰首箭头 */
+	--cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M4 2 L4 22 L9.5 17 L13 25 L16.5 23.5 L13 16 L20.5 16 Z' fill='%23ffffff' stroke='%231d5fb8' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E")
+		4 2, default;
+	/* 指示（可点击）：船锚手型 */
+	--cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 3 a2.6 2.6 0 1 0 0.001 0 Z M15 6 v14 M8 11 h-2.2 a9.3 9.3 0 0 0 18.4 0 H22 M11 8.5 h8' fill='none' stroke='%231d5fb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='15' cy='3.5' r='2.6' fill='%23ffffff' stroke='%231d5fb8' stroke-width='1.6'/%3E%3C/svg%3E")
+		15 3, pointer;
+	/* 文本插入：波纹竖线 */
+	--cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28' viewBox='0 0 20 28'%3E%3Cpath d='M10 3 v22 M6 6 h8 M6 22 h8' stroke='%233b82f6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+		10 14, text;
+}
+
+.dark {
+	/* Fate：金色描边 + 暗底 */
+	--cursor-default: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M4 2 L4 22 L9.5 17 L13 25 L16.5 23.5 L13 16 L20.5 16 Z' fill='%231c1610' stroke='%23d4af37' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M6 4 L6 18' stroke='%23a61e2b' stroke-width='1' opacity='0.6'/%3E%3C/svg%3E")
+		4 2, default;
+	--cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 3 a2.6 2.6 0 1 0 0.001 0 Z M15 6 v14 M8 11 h-2.2 a9.3 9.3 0 0 0 18.4 0 H22 M11 8.5 h8' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='15' cy='3.5' r='2.6' fill='%231c1610' stroke='%23d4af37' stroke-width='1.6'/%3E%3C/svg%3E")
+		15 3, pointer;
+	--cursor-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='28' viewBox='0 0 20 28'%3E%3Cpath d='M10 3 v22 M6 6 h8 M6 22 h8' stroke='%23e8c96a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+		10 14, text;
+}
+
+/* 应用到全局（按钮/链接等可交互元素用 pointer 形态） */
+body {
+	cursor: var(--cursor-default);
+}
+a,
+button,
+label,
+summary,
+[role='button'],
+input[type='button'],
+input[type='submit'] {
+	cursor: var(--cursor-pointer);
+}
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='url'],
+input[type='number'],
+textarea,
+[contenteditable='true'] {
+	cursor: var(--cursor-text);
+}
+/* 代码块：等宽选择感 */
+pre,
+code {
+	cursor: var(--cursor-text);
+}
+
 /* ============================== 打印样式 ============================== */
 @media print {
 	header,
