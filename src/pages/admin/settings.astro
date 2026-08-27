@@ -1,11 +1,18 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { requireAdminPage } from '../../lib/auth';
+import StyleControls from '../../components/admin/StyleControls.astro';
 
 export const prerender = false;
 
 const redirect = await requireAdminPage(Astro.locals.runtime.env, Astro.request);
 if (redirect) return redirect;
+
+const inputCls =
+	'h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500';
+const textareaCls =
+	'w-full resize-y rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-relaxed text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500';
+const labelCls = 'block text-xs font-medium text-zinc-500 dark:text-zinc-400';
 ---
 
 <AdminLayout title="站点设置">
@@ -13,7 +20,7 @@ if (redirect) return redirect;
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div>
 				<h1 class="text-2xl font-bold text-zinc-900 dark:text-white">站点设置</h1>
-				<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">站点标题、Logo、站长信息与前台文案在此编辑，保存后立即生效。</p>
+				<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">站点标题、Logo、站长信息与前台文案在此编辑；文案支持字体、颜色与换行，保存后立即生效。</p>
 			</div>
 			<button
 				type="button"
@@ -30,11 +37,11 @@ if (redirect) return redirect;
 				<h2 class="text-sm font-bold text-zinc-900 dark:text-white">站点信息</h2>
 				<div class="mt-4 space-y-4">
 					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-site-title">站点标题（浏览器标签、导航栏、RSS）</label>
-						<input id="f-site-title" type="text" placeholder="如 Larson's Blog" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+						<label class={labelCls} for="f-site-title">站点标题（浏览器标签、导航栏、RSS）</label>
+						<input id="f-site-title" type="text" placeholder="如 Larson's Blog" class={`mt-1.5 ${inputCls}`} />
 					</div>
 					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-site-logo">站点 Logo（留空则显示标题首字母）</label>
+						<label class={labelCls} for="f-site-logo">站点 Logo（留空则显示标题首字母）</label>
 						<div class="mt-1.5 flex items-center gap-3">
 							<div class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800" data-logo-preview>
 								<span class="text-sm font-bold text-zinc-400 dark:text-zinc-500">–</span>
@@ -66,12 +73,13 @@ if (redirect) return redirect;
 			<section class="rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
 				<h2 class="text-sm font-bold text-zinc-900 dark:text-white">站长信息</h2>
 				<div class="mt-4 space-y-4">
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-hero-name">站长名称（首页 Hero、关于页、页脚署名）</label>
-						<input id="f-hero-name" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+					<div data-style-group="heroName">
+						<label class={labelCls} for="f-hero-name">站长名称（首页 Hero、关于页、页脚署名）</label>
+						<input id="f-hero-name" type="text" class={`mt-1.5 ${inputCls}`} />
+						<StyleControls field="heroName" />
 					</div>
 					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-owner-avatar">站长头像（留空则显示名称首字母）</label>
+						<label class={labelCls} for="f-owner-avatar">站长头像（留空则显示名称首字母）</label>
 						<div class="mt-1.5 flex items-center gap-3">
 							<div class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800" data-logo-preview>
 								<span class="text-sm font-bold text-zinc-400 dark:text-zinc-500">–</span>
@@ -101,23 +109,29 @@ if (redirect) return redirect;
 			<!-- 首页 Hero -->
 			<section class="rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
 				<h2 class="text-sm font-bold text-zinc-900 dark:text-white">首页 Hero</h2>
-				<div class="mt-4 grid gap-4 sm:grid-cols-2">
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-hero-greeting">问候语</label>
-						<input id="f-hero-greeting" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+				<div class="mt-4 space-y-4">
+					<div data-style-group="heroGreeting">
+						<label class={labelCls} for="f-hero-greeting">问候语</label>
+						<input id="f-hero-greeting" type="text" class={`mt-1.5 ${inputCls}`} />
+						<StyleControls field="heroGreeting" />
 					</div>
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-tagline-light">浅色主题口号（港区）</label>
-						<input id="f-tagline-light" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div data-style-group="heroTaglineLight">
+							<label class={labelCls} for="f-tagline-light">浅色主题口号（港区）</label>
+							<input id="f-tagline-light" type="text" class={`mt-1.5 ${inputCls}`} />
+							<StyleControls field="heroTaglineLight" />
+						</div>
+						<div data-style-group="heroTaglineDark">
+							<label class={labelCls} for="f-tagline-dark">暗色主题口号（圣杯）</label>
+							<input id="f-tagline-dark" type="text" class={`mt-1.5 ${inputCls}`} />
+							<StyleControls field="heroTaglineDark" />
+						</div>
 					</div>
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-tagline-dark">暗色主题口号（圣杯）</label>
-						<input id="f-tagline-dark" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+					<div data-style-group="heroBio">
+						<label class={labelCls} for="f-hero-bio">首页简介（标题下方的一段话）</label>
+						<textarea id="f-hero-bio" rows="4" class={`mt-1.5 ${textareaCls}`}></textarea>
+						<StyleControls field="heroBio" multiline />
 					</div>
-				</div>
-				<div class="mt-4">
-					<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-hero-bio">首页简介（标题下方的一段话）</label>
-					<textarea id="f-hero-bio" rows="4" class="mt-1.5 w-full resize-y rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-relaxed text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"></textarea>
 				</div>
 			</section>
 
@@ -125,18 +139,20 @@ if (redirect) return redirect;
 			<section class="rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
 				<h2 class="text-sm font-bold text-zinc-900 dark:text-white">关于页</h2>
 				<div class="mt-4 space-y-4">
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-about-role">身份标语（头像下方一行）</label>
-						<input id="f-about-role" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+					<div data-style-group="aboutRole">
+						<label class={labelCls} for="f-about-role">身份标语（头像下方一行）</label>
+						<input id="f-about-role" type="text" class={`mt-1.5 ${inputCls}`} />
+						<StyleControls field="aboutRole" />
 					</div>
 					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-about-badges">标签（逗号分隔）</label>
-						<input id="f-about-badges" type="text" placeholder="写代码, 做产品, 记录生活" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+						<label class={labelCls} for="f-about-badges">标签（逗号分隔）</label>
+						<input id="f-about-badges" type="text" placeholder="写代码, 做产品, 记录生活" class={`mt-1.5 ${inputCls}`} />
 					</div>
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-about-bio">简介</label>
-						<textarea id="f-about-bio" rows="12" class="mt-1.5 w-full resize-y rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-relaxed text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"></textarea>
-						<p class="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-600">段落之间用空行分隔；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">**文字**</code> 加粗；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">&#123;name&#125;</code> 会替换为站长名称。</p>
+					<div data-style-group="aboutBio">
+						<label class={labelCls} for="f-about-bio">简介</label>
+						<textarea id="f-about-bio" rows="12" class={`mt-1.5 ${textareaCls}`}></textarea>
+						<StyleControls field="aboutBio" multiline />
+						<p class="mt-1.5 text-[11px] text-zinc-400 dark:text-zinc-600">空行分段、段内回车换行；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">**文字**</code> 加粗；<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">&#123;name&#125;</code> 会替换为站长名称。</p>
 					</div>
 				</div>
 
@@ -156,19 +172,21 @@ if (redirect) return redirect;
 				</div>
 
 				<!-- 联系卡片 -->
-				<div class="mt-6 grid gap-4 sm:grid-cols-2">
-					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-contact-title">联系区标题</label>
-						<input id="f-contact-title" type="text" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+				<div class="mt-6 space-y-4">
+					<div data-style-group="aboutContactTitle">
+						<label class={labelCls} for="f-contact-title">联系区标题</label>
+						<input id="f-contact-title" type="text" class={`mt-1.5 ${inputCls}`} />
+						<StyleControls field="aboutContactTitle" />
+					</div>
+					<div data-style-group="aboutContactDesc">
+						<label class={labelCls} for="f-contact-desc">联系区描述</label>
+						<textarea id="f-contact-desc" rows="2" class={`mt-1.5 ${textareaCls}`}></textarea>
+						<StyleControls field="aboutContactDesc" multiline />
 					</div>
 					<div>
-						<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-contact-email">联系邮箱（留空则隐藏邮件按钮）</label>
-						<input id="f-contact-email" type="text" placeholder="you@example.com" class="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500" />
+						<label class={labelCls} for="f-contact-email">联系邮箱（留空则隐藏邮件按钮）</label>
+						<input id="f-contact-email" type="text" placeholder="you@example.com" class={`mt-1.5 ${inputCls}`} />
 					</div>
-				</div>
-				<div class="mt-4">
-					<label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400" for="f-contact-desc">联系区描述</label>
-					<textarea id="f-contact-desc" rows="2" class="mt-1.5 w-full resize-y rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-relaxed text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500"></textarea>
 				</div>
 			</section>
 		</form>
@@ -191,21 +209,27 @@ if (redirect) return redirect;
 			desc: string;
 		}
 
+		interface StyledText {
+			text: string;
+			color: string;
+			font: string;
+		}
+
 		interface SiteSettings {
 			siteTitle: string;
 			siteLogo: string;
 			ownerAvatar: string;
-			heroGreeting: string;
-			heroName: string;
-			heroTaglineLight: string;
-			heroTaglineDark: string;
-			heroBio: string;
-			aboutRole: string;
+			heroGreeting: StyledText;
+			heroName: StyledText;
+			heroTaglineLight: StyledText;
+			heroTaglineDark: StyledText;
+			heroBio: StyledText;
+			aboutRole: StyledText;
 			aboutBadges: string[];
-			aboutBio: string;
+			aboutBio: StyledText;
 			aboutTimeline: TimelineItem[];
-			aboutContactTitle: string;
-			aboutContactDesc: string;
+			aboutContactTitle: StyledText;
+			aboutContactDesc: StyledText;
 			aboutContactEmail: string;
 		}
 
@@ -213,6 +237,62 @@ if (redirect) return redirect;
 
 		const inputCls =
 			'h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-white dark:focus:border-brand-500';
+
+		const STYLED_FIELDS = [
+			'heroGreeting',
+			'heroName',
+			'heroTaglineLight',
+			'heroTaglineDark',
+			'heroBio',
+			'aboutRole',
+			'aboutBio',
+			'aboutContactTitle',
+			'aboutContactDesc',
+		] as const;
+
+		/* ---------- 文案样式控件（字体 / 颜色）绑定 ---------- */
+
+		interface StyleGroupState {
+			get(): StyledText;
+			set(value: StyledText): void;
+		}
+
+		const styleGroups: Partial<Record<(typeof STYLED_FIELDS)[number], StyleGroupState>> = {};
+
+		for (const group of document.querySelectorAll<HTMLElement>('[data-style-group]')) {
+			const field = group.dataset.styleGroup as (typeof STYLED_FIELDS)[number];
+			const textEl = group.querySelector<HTMLInputElement | HTMLTextAreaElement>('input[type="text"], textarea');
+			const colorInput = group.querySelector<HTMLInputElement>('[data-color-select]');
+			const fontSelect = group.querySelector<HTMLSelectElement>('[data-font-select]');
+			const resetBtn = group.querySelector<HTMLButtonElement>('[data-color-reset]');
+			if (!textEl || !colorInput || !fontSelect) continue;
+
+			let color = '';
+			const sync = () => {
+				colorInput.style.opacity = color ? '1' : '0.35';
+			};
+			colorInput.addEventListener('input', () => {
+				color = colorInput.value;
+				sync();
+			});
+			resetBtn?.addEventListener('click', () => {
+				color = '';
+				colorInput.value = '#1d5fb8';
+				sync();
+			});
+			sync();
+
+			styleGroups[field] = {
+				get: () => ({ text: textEl.value, color, font: fontSelect.value }),
+				set: (value) => {
+					textEl.value = value.text;
+					color = value.color || '';
+					colorInput.value = color || '#1d5fb8';
+					fontSelect.value = value.font || '';
+					sync();
+				},
+			};
+		}
 
 		/* ---------- 图片字段（Logo / 头像）：预览 + 上传到 R2 + 清除 ---------- */
 
@@ -329,17 +409,11 @@ if (redirect) return redirect;
 			fill('f-site-title', data.siteTitle);
 			fill('f-site-logo', data.siteLogo);
 			fill('f-owner-avatar', data.ownerAvatar);
-			fill('f-hero-name', data.heroName);
-			fill('f-hero-greeting', data.heroGreeting);
-			fill('f-tagline-light', data.heroTaglineLight);
-			fill('f-tagline-dark', data.heroTaglineDark);
-			fill('f-hero-bio', data.heroBio);
-			fill('f-about-role', data.aboutRole);
 			fill('f-about-badges', data.aboutBadges.join(', '));
-			fill('f-about-bio', data.aboutBio);
-			fill('f-contact-title', data.aboutContactTitle);
-			fill('f-contact-desc', data.aboutContactDesc);
 			fill('f-contact-email', data.aboutContactEmail);
+			for (const field of STYLED_FIELDS) {
+				styleGroups[field]?.set(data[field]);
+			}
 			refreshPreview('f-site-logo');
 			refreshPreview('f-owner-avatar');
 			for (const item of data.aboutTimeline) addTimelineRow(item);
@@ -351,18 +425,12 @@ if (redirect) return redirect;
 				siteTitle: val('f-site-title'),
 				siteLogo: val('f-site-logo'),
 				ownerAvatar: val('f-owner-avatar'),
-				heroGreeting: val('f-hero-greeting'),
-				heroName: val('f-hero-name'),
-				heroTaglineLight: val('f-tagline-light'),
-				heroTaglineDark: val('f-tagline-dark'),
-				heroBio: val('f-hero-bio'),
-				aboutRole: val('f-about-role'),
 				aboutBadges: val('f-about-badges'),
-				aboutBio: val('f-about-bio'),
-				aboutContactTitle: val('f-contact-title'),
-				aboutContactDesc: val('f-contact-desc'),
 				aboutContactEmail: val('f-contact-email'),
 			};
+			for (const field of STYLED_FIELDS) {
+				payload[field] = styleGroups[field]?.get();
+			}
 			const timeline = collectTimeline().filter((t) => t.title);
 			if (timeline.length) payload.aboutTimeline = timeline;
 

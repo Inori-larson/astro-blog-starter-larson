@@ -34,7 +34,7 @@ const year = today.getFullYear();
 					<span class="font-bold text-zinc-900 dark:text-white">{site.siteTitle}</span>
 				</div>
 			<p class="mt-3 text-sm leading-relaxed text-zinc-500 dark:text-zinc-500">
-				{site.heroName} 的数字自留地。记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
+				{site.heroName.text} 的数字自留地。记录技术笔记、项目复盘与生活随想，把踩过的坑写成文字，分享给同样在路上的人。
 			</p>
 			<SubscribeBox />
 		</div>
@@ -68,9 +68,9 @@ const year = today.getFullYear();
 		<div
 			class="mt-10 flex flex-col items-center justify-between gap-2 border-t border-zinc-200/70 pt-6 text-xs text-zinc-400 sm:flex-row dark:border-zinc-800/70 dark:text-zinc-500"
 		>
-			<span>&copy; {year} {site.heroName}。保留所有权利。</span>
+			<span>&copy; {year} {site.heroName.text}。保留所有权利。</span>
 			<span>
-				由 {site.heroName} 设计与构建
+				由 {site.heroName.text} 设计与构建
 			</span>
 		</div>
 	</div>

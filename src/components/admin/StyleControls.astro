@@ -1,0 +1,45 @@
+---
+/**
+ * 站点设置页的文案样式控件（字体下拉 + 颜色选择 + 恢复默认）。
+ * 用法：外包一层 <div data-style-group="字段名"> 包含文本输入框与本组件。
+ * JS 端通过 data-style-group 统一收集 { text, color, font }。
+ */
+interface Props {
+	field: string;
+	/** 是否显示「回车换行」提示（仅 textarea 字段） */
+	multiline?: boolean;
+}
+const { field, multiline = false } = Astro.props;
+---
+
+<div class="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5" data-style-controls={field}>
+	<label class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+		字体
+		<select
+			data-font-select
+			class="h-7 cursor-pointer rounded-md border border-zinc-200 bg-zinc-50 px-1.5 text-xs text-zinc-700 outline-none focus:border-brand-400 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300 dark:focus:border-brand-500"
+		>
+			<option value="">跟随站点</option>
+			<option value="serif">衬线 / 宋体</option>
+			<option value="kai">楷体</option>
+			<option value="fangsong">仿宋</option>
+			<option value="mono">等宽</option>
+		</select>
+	</label>
+	<span class="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+		颜色
+		<input
+			data-color-select
+			type="color"
+			title="自定义颜色"
+			class="h-7 w-9 cursor-pointer rounded-md border border-zinc-200 bg-transparent p-0.5 dark:border-zinc-700"
+		/>
+		<button
+			type="button"
+			data-color-reset
+			title="恢复跟随主题的默认颜色"
+			class="rounded px-1.5 py-0.5 text-[11px] text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300">默认</button
+		>
+	</span>
+	{multiline && <span class="text-[11px] text-zinc-400 dark:text-zinc-600">回车换行</span>}
+</div>
