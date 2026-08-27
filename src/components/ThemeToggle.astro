@@ -2,10 +2,10 @@
 // 世界观切换按钮：碧蓝航线（浅色）⇄ Fate（暗色）
 // 图标语义：太阳=白天的母港，月亮=圣杯战争之夜
 interface Props {
-	/** 显示文字标签（后台侧边栏用） */
+	/** 显示文字标签 */
 	showLabel?: boolean;
-	/** 标签对齐方式：row = 图标左文字右（侧边栏），col = 图标上文字下 */
-	labelAlign?: 'row' | 'col';
+	/** 标签布局：row = 侧边栏整行；pill = 前台顶栏胶囊（图标+文字，移动端隐藏文字） */
+	labelAlign?: 'row' | 'pill' | 'col';
 }
 
 const { showLabel = false, labelAlign = 'col' } = Astro.props;
@@ -17,11 +17,11 @@ const { showLabel = false, labelAlign = 'col' } = Astro.props;
 	aria-label="切换世界观：碧蓝航线 / Fate"
 	class:list={[
 		'group transition-all text-zinc-500 dark:text-amber-200/70',
-		showLabel
-			? labelAlign === 'row'
-				? 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800'
-				: 'inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400'
-			: 'inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400',
+		labelAlign === 'row' && showLabel
+			? 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800'
+			: labelAlign === 'pill' && showLabel
+				? 'inline-flex h-9 items-center gap-1.5 rounded-full border border-zinc-200/80 bg-white/60 px-3 text-xs font-medium backdrop-blur transition-colors hover:border-zinc-300 hover:text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:border-zinc-600 dark:hover:text-zinc-300'
+				: 'inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-sky-100 hover:text-brand-600 dark:hover:bg-amber-500/10 dark:hover:text-amber-400',
 	]}
 >
 	<!-- 白天：碧蓝航线——舵轮/太阳（浅色模式显示） -->
@@ -59,7 +59,7 @@ const { showLabel = false, labelAlign = 'col' } = Astro.props;
 
 	{
 		showLabel && (
-			<span class="theme-toggle-label select-none">
+			<span class:list={['theme-toggle-label select-none', labelAlign === 'pill' && 'hidden sm:inline']}>
 				<span class="dark:hidden">港区 · 白昼</span>
 				<span class="hidden dark:inline">圣杯 · 深夜</span>
 			</span>
