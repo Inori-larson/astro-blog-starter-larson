@@ -2,7 +2,7 @@
 title: "Markdown 语法指南"
 description: "我在博客写作中常用的 Markdown 语法备忘，也是这个站点排版能力的完整演示。"
 pubDate: "Jun 19 2024"
-heroImage: "/blog-placeholder-1.jpg"
+heroImage: "https://blog.larson.it.com/media/uploads/2026-08-27/c18e1d4f-blog-placeholder-1.jpg"
 tags: ["Markdown", "写作", "技术"]
 ---
 
@@ -40,7 +40,7 @@ tags: ["Markdown", "写作", "技术"]
 
 ### 输出
 
-![博客占位图](/blog-placeholder-about.jpg)
+![博客占位图](https://blog.larson.it.com/media/uploads/2026-08-27/c8a014d8-blog-placeholder-about.jpg)
 
 ## 引用块
 

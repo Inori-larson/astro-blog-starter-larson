@@ -2,7 +2,7 @@
 title: "慢下来，才能走得远"
 description: "关于节奏、焦虑与长期主义的一点个人体会。"
 pubDate: "Jul 15 2022"
-heroImage: "/blog-placeholder-4.jpg"
+heroImage: "https://blog.larson.it.com/media/uploads/2026-08-27/0a82191c-blog-placeholder-4.jpg"
 tags: ["随笔", "生活"]
 ---
 

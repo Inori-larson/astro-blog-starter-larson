@@ -2,7 +2,7 @@
 title: "用 MDX 写博客是什么体验"
 description: "在 Markdown 里直接嵌入组件——我选择 MDX 作为博客写作格式的原因。"
 pubDate: "Jun 01 2024"
-heroImage: "/blog-placeholder-5.jpg"
+heroImage: "https://blog.larson.it.com/media/uploads/2026-08-27/429e2c75-blog-placeholder-5.jpg"
 tags: ["MDX", "写作", "技术"]
 ---
 

@@ -2,7 +2,7 @@
 title: "为什么我又开始写博客"
 description: "在短视频与信息流的年代，重新拾起长文写作的理由。"
 pubDate: "Jul 08 2022"
-heroImage: "/blog-placeholder-3.jpg"
+heroImage: "https://blog.larson.it.com/media/uploads/2026-08-27/fe84e4f7-blog-placeholder-3.jpg"
 tags: ["随笔", "开始"]
 ---
 

@@ -2,7 +2,7 @@
 title: "把过程写下来，是最好的复盘"
 description: "为什么我坚持记录每一次踩坑，而不是只收藏答案。"
 pubDate: "Jul 22 2022"
-heroImage: "/blog-placeholder-2.jpg"
+heroImage: "https://blog.larson.it.com/media/uploads/2026-08-27/14cefa54-blog-placeholder-2.jpg"
 tags: ["随笔", "思考"]
 ---
 
