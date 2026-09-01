@@ -1,4 +1,4 @@
-import { eq, inArray, notInArray, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { postTags, tags } from '../db/schema';
 import type { Db } from './db';
 import GithubSlugger from 'github-slugger';
@@ -31,13 +31,4 @@ export async function syncTags(db: Db, postId: number, tagNames: string[]): Prom
 
 	// 清理无任何文章引用的僵尸标签（单条 SQL，低频后台操作）
 	await db.run(sql`delete from tags where id not in (select distinct tag_id from post_tags)`);
-}
-
-/** 僵尸标签数（诊断用，可选） */
-export async function orphanTagCount(db: Db): Promise<number> {
-	const rows = await db
-		.select({ id: tags.id })
-		.from(tags)
-		.where(notInArray(tags.id, sql`(select distinct tag_id from post_tags)`));
-	return rows.length;
 }
