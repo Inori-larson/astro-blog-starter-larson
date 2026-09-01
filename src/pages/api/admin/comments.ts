@@ -1,13 +1,12 @@
 import type { APIRoute } from 'astro';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, isNull } from 'drizzle-orm';
 import { getDb } from '../../../lib/db';
 import { comments, posts } from '../../../db/schema';
 import { requireAdmin } from '../../../lib/auth';
-import { invalidateCache } from '../../../lib/cache';
 
 export const prerender = false;
 
-/** 全部评论（管理端，按时间倒序） */
+/** 全部评论（管理端，按时间倒序；排除已删除文章的评论） */
 export const GET: APIRoute = async ({ request, locals }) => {
 	const guard = await requireAdmin(locals.runtime.env, request);
 	if ('response' in guard) return guard.response;
@@ -26,18 +25,18 @@ export const GET: APIRoute = async ({ request, locals }) => {
 			createdAt: comments.createdAt,
 		})
 		.from(comments)
-		.leftJoin(posts, eq(posts.id, comments.postId))
+		.innerJoin(posts, eq(posts.id, comments.postId))
+		.where(isNull(posts.deletedAt))
 		.orderBy(desc(comments.createdAt))
 		.limit(200);
 	return Response.json({ items: rows });
 };
 
-/** 审核：更新评论状态 / 删除 */
-export const PUT: APIRoute = async ({ params, request, locals }) => {
+/** 审核：更新评论状态 / 删除（评论不在页面缓存内，无需失效缓存） */
+export const PUT: APIRoute = async ({ request, locals }) => {
 	const guard = await requireAdmin(locals.runtime.env, request);
 	if ('response' in guard) return guard.response;
 
-	void params;
 	let body: { id?: number; action?: string };
 	try {
 		body = await request.json();
@@ -52,17 +51,15 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
 	if (body.action === 'delete') {
 		await db.delete(comments).where(eq(comments.id, id));
 	} else if (body.action === 'approve' || body.action === 'pending' || body.action === 'spam') {
-		const status = body.action as 'approved' | 'pending' | 'spam';
 		const map: Record<string, 'approved' | 'pending' | 'spam'> = {
 			approve: 'approved',
 			pending: 'pending',
 			spam: 'spam',
 		};
-		await db.update(comments).set({ status: map[status] }).where(eq(comments.id, id));
+		await db.update(comments).set({ status: map[body.action] }).where(eq(comments.id, id));
 	} else {
 		return Response.json({ error: '未知操作' }, { status: 400 });
 	}
 
-	await invalidateCache({ locals });
 	return Response.json({ ok: true });
 };

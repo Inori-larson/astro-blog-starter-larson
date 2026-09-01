@@ -1,11 +1,12 @@
 import type { APIRoute } from 'astro';
 import { desc, eq, isNull, and } from 'drizzle-orm';
+import GithubSlugger from 'github-slugger';
 import { getDb } from '../../../../lib/db';
 import { posts } from '../../../../db/schema';
 import { requireAdmin } from '../../../../lib/auth';
 import { renderMarkdown, readingTimeMinutes } from '../../../../lib/markdown';
 import { invalidateCache } from '../../../../lib/cache';
-import GithubSlugger from 'github-slugger';
+import { syncTags } from '../../../../lib/tags';
 
 export const prerender = false;
 
@@ -55,6 +56,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	if (!body.title?.trim()) return Response.json({ error: '标题不能为空' }, { status: 400 });
+	if (body.title.trim().length > 200) return Response.json({ error: '标题不能超过 200 字' }, { status: 400 });
 	if (!body.contentMd?.trim()) return Response.json({ error: '内容不能为空' }, { status: 400 });
 
 	// slug：默认从标题生成（中文标题转拼音不可行，回退为 post-{时间戳}，可手动指定）
@@ -67,12 +69,22 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	const db = getDb({ locals });
-	const exists = await db.select({ id: posts.id }).from(posts).where(eq(posts.slug, slug)).limit(1);
+	// 唯一性只对未删除文章校验（软删的 slug 可复用）
+	const exists = await db
+		.select({ id: posts.id })
+		.from(posts)
+		.where(and(eq(posts.slug, slug), isNull(posts.deletedAt)))
+		.limit(1);
 	if (exists.length) return Response.json({ error: `slug「${slug}」已存在` }, { status: 409 });
 
 	const { html } = await renderMarkdown(body.contentMd);
 	const status = body.status === 'draft' ? 'draft' : 'published';
-	const publishedAt = body.publishedAt ? new Date(body.publishedAt) : new Date();
+	let publishedAt = new Date();
+	if (body.publishedAt) {
+		const d = new Date(String(body.publishedAt));
+		if (Number.isNaN(d.getTime())) return Response.json({ error: '发布日期格式不正确' }, { status: 400 });
+		publishedAt = d;
+	}
 
 	const [row] = await db
 		.insert(posts)
@@ -93,17 +105,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	await syncTags(db, row.id, body.tags ?? []);
 	if (status === 'published') {
 		await invalidateCache({ locals });
-		// 通知已验证订阅者（未配置 RESEND_API_KEY 时静默跳过）
-		void notifySubscribers(locals, {
-			title: body.title.trim(),
-			description: body.description?.trim() ?? '',
-			slug: row.slug,
-		});
+		// 通知已验证订阅者：挂 waitUntil 保证响应后继续执行（未配置 RESEND_API_KEY 时静默跳过）
+		locals.runtime.ctx?.waitUntil?.(
+			notifySubscribers(locals, {
+				title: body.title.trim(),
+				description: body.description?.trim() ?? '',
+				slug: row.slug,
+			}),
+		);
 	}
 	return Response.json({ ok: true, id: row.id, slug: row.slug }, { status: 201 });
 };
 
-/** 给已验证订阅者群发新文章通知（fire-and-forget，失败不影响发布） */
+/** 给已验证订阅者群发新文章通知（失败仅记日志，不影响发布） */
 async function notifySubscribers(
 	locals: App.Locals,
 	post: { title: string; description: string; slug: string },
@@ -112,34 +126,20 @@ async function notifySubscribers(
 		const env = locals.runtime.env as { RESEND_API_KEY?: string };
 		if (!env.RESEND_API_KEY) return;
 		const { subscribers } = await import('../../../../db/schema');
-		const { sendNewPost } = await import('../../../../lib/mail');
+		const { sendNewPostBatch } = await import('../../../../lib/mail');
 		const db = getDb({ locals });
 		const rows = await db
 			.select({ email: subscribers.email })
 			.from(subscribers)
 			.where(eq(subscribers.verified, true));
-		for (const row of rows) {
-			await sendNewPost(env, row.email, post);
-		}
-	} catch {
-		// 通知失败不影响发布主流程
-	}
-}
-
-/** 标签同步（内联在此避免循环依赖） */
-async function syncTags(db: ReturnType<typeof getDb>, postId: number, tagNames: string[]) {
-	const { postTags, tags } = await import('../../../../db/schema');
-	await db.delete(postTags).where(eq(postTags.postId, postId));
-	if (!tagNames.length) return;
-	const slugger = new GithubSlugger();
-	for (const name of tagNames.map((t) => t.trim()).filter(Boolean).slice(0, 10)) {
-		const slug = slugger.slug(name);
-		const [existing] = await db.select({ id: tags.id }).from(tags).where(eq(tags.name, name)).limit(1);
-		let tagId = existing?.id;
-		if (!tagId) {
-			const [created] = await db.insert(tags).values({ name, slug }).returning({ id: tags.id });
-			tagId = created.id;
-		}
-		await db.insert(postTags).values({ postId, tagId });
+		if (!rows.length) return;
+		const result = await sendNewPostBatch(
+			env,
+			rows.map((r) => r.email),
+			post,
+		);
+		if (!result.ok) console.error('[notify] 新文章邮件发送失败:', result.error);
+	} catch (e) {
+		console.error('[notify] 新文章通知异常:', e instanceof Error ? e.message : String(e));
 	}
 }

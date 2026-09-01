@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
 import { getDb } from '../../lib/db';
 import { cached } from '../../lib/cache';
-import { listPostsByTag } from '../../lib/posts';
+import { listPosts } from '../../lib/posts';
 
 export const prerender = false;
 
@@ -11,10 +11,10 @@ const { tag } = Astro.params;
 if (!tag) return Astro.redirect('/tags/');
 
 const tagName = decodeURIComponent(tag);
+// 复用 posts:list 缓存后内存过滤，避免为每个标签（含任意乱码标签）单独写一份 KV 缓存
 const db = getDb(Astro);
-const posts = await cached(Astro, `tags:posts:${tagName}`, 300, () =>
-	listPostsByTag(db, tagName),
-);
+const allPosts = await cached(Astro, 'posts:list', 300, () => listPosts(db));
+const posts = allPosts.filter((p) => p.tags.includes(tagName));
 ---
 
 <BaseLayout title={`#${tagName}`} description={`标签「${tagName}」下的全部文章`}>

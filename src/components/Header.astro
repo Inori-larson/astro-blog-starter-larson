@@ -226,7 +226,13 @@ const firstSegment = '/' + (subpath?.[0] || '');
 	};
 
 	// 滚动方向感知：下滑隐藏、上滑显示（菜单展开时除外）
+	// 模块级引用：软导航时先移除上一次的监听器，避免累积
+	let scrollHideHandler: (() => void) | null = null;
 	const initScrollHide = () => {
+		if (scrollHideHandler) {
+			window.removeEventListener('scroll', scrollHideHandler);
+			scrollHideHandler = null;
+		}
 		const header = document.getElementById('site-header');
 		if (!header) return;
 
@@ -251,7 +257,7 @@ const firstSegment = '/' + (subpath?.[0] || '');
 				requestAnimationFrame(update);
 			}
 		};
-		window.removeEventListener('scroll', onScroll);
+		scrollHideHandler = onScroll;
 		window.addEventListener('scroll', onScroll, { passive: true });
 	};
 

@@ -123,7 +123,8 @@ const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 export async function getSiteSettings(ctx: { locals: App.Locals }, db: ReturnType<typeof getDb>): Promise<SiteSettings> {
 	try {
 		return await cached(ctx, 'settings:site', 300, () => readSiteSettings(db));
-	} catch {
+	} catch (e) {
+		console.error('[settings] 读取失败，回退默认值:', e instanceof Error ? e.message : String(e));
 		return { ...DEFAULT_SITE_SETTINGS };
 	}
 }

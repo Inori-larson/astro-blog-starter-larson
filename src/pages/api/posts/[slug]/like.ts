@@ -8,7 +8,7 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ params, request, locals }) => {
 	const { slug } = params;
-	if (!slug) return Response.json({ error: 'missing slug' }, { status: 400 });
+	if (!slug || !/^[a-z0-9-]+$/.test(slug)) return Response.json({ error: 'invalid slug' }, { status: 400 });
 
 	const db = getDb({ locals });
 	const postId = await getPostIdBySlug(db, slug);
@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
 export const GET: APIRoute = async ({ params, request, locals }) => {
 	const { slug } = params;
-	if (!slug) return Response.json({ error: 'missing slug' }, { status: 400 });
+	if (!slug || !/^[a-z0-9-]+$/.test(slug)) return Response.json({ error: 'invalid slug' }, { status: 400 });
 
 	const db = getDb({ locals });
 	const postId = await getPostIdBySlug(db, slug);

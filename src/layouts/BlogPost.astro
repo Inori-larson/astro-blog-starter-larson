@@ -331,7 +331,13 @@ const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
 	};
 
 	// ===== 目录：滚动时高亮当前章节 =====
+	// 模块级引用：软导航时先移除上一次注册的监听器，避免累积
+	let tocScrollHandler: (() => void) | null = null;
 	const setupTocHighlight = () => {
+		if (tocScrollHandler) {
+			window.removeEventListener('scroll', tocScrollHandler);
+			tocScrollHandler = null;
+		}
 		const links = document.querySelectorAll('[data-toc-link]');
 		if (!links.length) return;
 
@@ -360,7 +366,7 @@ const hasToc = headings.some((h) => h.depth >= 2 && h.depth <= 3);
 			}
 			setActive(current);
 		};
-		window.removeEventListener('scroll', onScroll);
+		tocScrollHandler = onScroll;
 		window.addEventListener('scroll', onScroll, { passive: true });
 		onScroll();
 	};

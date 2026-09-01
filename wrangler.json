@@ -24,14 +24,11 @@
 		{
 			"binding": "CACHE",
 			"id": "418e2f6b9c844fe684ec6af033c6dcb1"
-		},
-		{
-			"binding": "SESSION",
-			"id": "074b72cc0cff4399b56dfb80ea7ee720"
 		}
 	],
 	"observability": {
-		"enabled": true
+		"enabled": true,
+		"head_sampling_rate": 1
 	},
 	"upload_source_maps": true
 }

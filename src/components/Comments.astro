@@ -307,7 +307,8 @@ const { slug } = Astro.props;
 					showMsg(String(data.error ?? '提交失败，请稍后再试'), false);
 					return;
 				}
-				showMsg('评论成功！', true);
+				const pending = (data as { pending?: boolean }).pending;
+				showMsg(pending ? '评论已提交，审核通过后显示' : '评论成功！', true);
 				form.reset();
 				if (charCount) charCount.textContent = '0';
 				setReply(null);

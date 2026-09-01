@@ -50,13 +50,21 @@ async function getKv(ctx: CacheContext) {
 	}
 }
 
+/** 缓存键合法性：仅允许字母/数字/冒号/连字符/下划线/点，长度 ≤ 200（防用户可控键污染 KV） */
+function safeKey(key: string): boolean {
+	return /^[a-zA-Z0-9:-_.]{1,200}$/.test(key);
+}
+
 export async function cached<T>(ctx: CacheContext, key: string, ttlSeconds: number, fn: () => Promise<T>): Promise<T> {
+	// 不安全键只走内存缓存，避免任意访客构造键刷爆 KV 写额度
+	const persist = safeKey(key);
+
 	// L1 内存
 	const memHit = memGet<T>(key);
 	if (memHit !== undefined) return memHit;
 
 	// L2 KV（以纯文本读取后用 reviver 还原日期字段）
-	const kv = await getKv(ctx);
+	const kv = persist ? await getKv(ctx) : undefined;
 	let kvHit: T | undefined;
 	if (kv) {
 		try {
@@ -66,19 +74,19 @@ export async function cached<T>(ctx: CacheContext, key: string, ttlSeconds: numb
 				memSet(key, kvHit, ttlSeconds * 1000);
 				return kvHit;
 			}
-		} catch {
-			// KV 不可用不影响主流程
+		} catch (e) {
+			console.error('[cache] KV 读取失败:', e instanceof Error ? e.message : String(e));
 		}
 	}
 
-	// 回源
+	// 回源：null/undefined（如文章不存在）不落 KV，防负缓存写放大
 	const value = await fn();
 	memSet(key, value, ttlSeconds * 1000);
-	if (kv) {
+	if (kv && value !== null && value !== undefined) {
 		try {
 			await kv.put(`c:${key}`, JSON.stringify(value), { expirationTtl: Math.max(ttlSeconds, 60) });
-		} catch {
-			// 忽略写失败
+		} catch (e) {
+			console.error('[cache] KV 写入失败:', e instanceof Error ? e.message : String(e));
 		}
 	}
 	return value;
@@ -96,7 +104,7 @@ export async function invalidateCache(ctx: CacheContext, prefix = '') {
 		const keys: string[] = [];
 		for (const key of list.keys ?? []) keys.push(key.name);
 		if (keys.length) await Promise.all(keys.map((k) => kv.delete(k)));
-	} catch {
-		// 忽略
+	} catch (e) {
+		console.error('[cache] 缓存失效失败:', e instanceof Error ? e.message : String(e));
 	}
 }

@@ -11,8 +11,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
 	if ('response' in guard) return guard.response;
 
 	const db = getDb({ locals });
-	const alive = and(isNull(posts.deletedAt));
-	void alive;
 
 	const [postCount] = await db
 		.select({
@@ -22,23 +20,35 @@ export const GET: APIRoute = async ({ request, locals }) => {
 		.from(posts)
 		.where(isNull(posts.deletedAt));
 
+	// 评论/点赞/浏览只统计未删除文章（软删文章的关联数据在删除时已清理，这里再兜底过滤）
 	const [commentCount] = await db
 		.select({
 			total: sql<number>`count(*)`,
-			pending: sql<number>`sum(case when status = 'pending' then 1 else 0 end)`,
+			pending: sql<number>`sum(case when ${comments.status} = 'pending' then 1 else 0 end)`,
 		})
-		.from(comments);
+		.from(comments)
+		.innerJoin(posts, eq(posts.id, comments.postId))
+		.where(isNull(posts.deletedAt));
 
-	const [likeCount] = await db.select({ total: sql<number>`count(*)` }).from(reactions);
+	const [likeCount] = await db
+		.select({ total: sql<number>`count(*)` })
+		.from(reactions)
+		.innerJoin(posts, eq(posts.id, reactions.postId))
+		.where(isNull(posts.deletedAt));
 
-	const [viewCount] = await db.select({ total: sql<number>`coalesce(sum(${viewStats.count}), 0)` }).from(viewStats);
+	const [viewCount] = await db
+		.select({ total: sql<number>`coalesce(sum(${viewStats.count}), 0)` })
+		.from(viewStats)
+		.innerJoin(posts, eq(posts.id, viewStats.postId))
+		.where(isNull(posts.deletedAt));
 
 	// 近 14 天浏览趋势
 	const since = new Date(Date.now() - 14 * 86400_000).toISOString().slice(0, 10);
 	const trend = await db
 		.select({ date: viewStats.date, count: sql<number>`sum(${viewStats.count})` })
 		.from(viewStats)
-		.where(gte(viewStats.date, since))
+		.innerJoin(posts, eq(posts.id, viewStats.postId))
+		.where(and(isNull(posts.deletedAt), gte(viewStats.date, since)))
 		.groupBy(viewStats.date)
 		.orderBy(viewStats.date);
 

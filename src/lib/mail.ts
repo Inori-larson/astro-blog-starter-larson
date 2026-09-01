@@ -14,6 +14,11 @@ export interface SendResult {
 	error?: string;
 }
 
+/** HTML 转义（标题/描述等用户可见文本插入邮件模板前） */
+function escapeHtml(s: string): string {
+	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function send(env: MailEnv, to: string, subject: string, html: string): Promise<SendResult> {
 	const apiKey = env.RESEND_API_KEY;
 	if (!apiKey) return { ok: false, error: 'RESEND_API_KEY 未配置（邮件已跳过）' };
@@ -36,6 +41,34 @@ async function send(env: MailEnv, to: string, subject: string, html: string): Pr
 	} catch (e) {
 		return { ok: false, error: e instanceof Error ? e.message : String(e) };
 	}
+}
+
+/** 批量发送（Resend 单次最多 50 收件人）：分批并行，单封失败不影响其余 */
+async function sendBatch(env: MailEnv, tos: string[], subject: string, html: string): Promise<SendResult> {
+	const apiKey = env.RESEND_API_KEY;
+	if (!apiKey) return { ok: false, error: 'RESEND_API_KEY 未配置（邮件已跳过）' };
+	const from = env.MAIL_FROM || 'Larson\'s Blog <onboarding@resend.dev>';
+	const CHUNK = 50;
+	const failures: string[] = [];
+	try {
+		for (let i = 0; i < tos.length; i += CHUNK) {
+			const res = await fetch('https://api.resend.com/emails', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${apiKey}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ from, to: tos.slice(i, i + CHUNK), subject, html }),
+			});
+			if (!res.ok) {
+				const text = await res.text();
+				failures.push(`批次${Math.floor(i / CHUNK) + 1} Resend ${res.status}: ${text.slice(0, 200)}`);
+			}
+		}
+	} catch (e) {
+		failures.push(e instanceof Error ? e.message : String(e));
+	}
+	return failures.length ? { ok: false, error: failures.join('; ') } : { ok: true };
 }
 
 /** 邮件外壳：与站点双世界观呼应的简洁模板 */
@@ -77,21 +110,32 @@ export async function sendSubscribeConfirm(env: MailEnv, to: string, token: stri
 	);
 }
 
-/** 新文章通知邮件 */
+/** 新文章通知邮件（单收件人，保留给低量场景） */
 export async function sendNewPost(
 	env: MailEnv,
 	to: string,
 	post: { title: string; description: string; slug: string },
 ): Promise<SendResult> {
+	return sendNewPostBatch(env, [to], post);
+}
+
+/** 新文章通知邮件（批量）：所有已验证订阅者一次性送达 */
+export async function sendNewPostBatch(
+	env: MailEnv,
+	tos: string[],
+	post: { title: string; description: string; slug: string },
+): Promise<SendResult> {
 	const link = `${SITE_URL}/blog/${post.slug}/`;
-	return send(
+	const title = escapeHtml(post.title);
+	const desc = escapeHtml(post.description);
+	return sendBatch(
 		env,
-		to,
+		tos,
 		`新文章：${post.title}`,
 		layout(
 			'新文章发布啦',
-			`<p>${post.description || '点击下方链接阅读全文。'}</p>
-			<p style="margin:24px 0;"><a href="${link}" style="display:inline-block;padding:12px 28px;background:linear-gradient(90deg,#1d5fb8,#3b82f6);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">${post.title}</a></p>
+			`<p>${desc || '点击下方链接阅读全文。'}</p>
+			<p style="margin:24px 0;"><a href="${link}" style="display:inline-block;padding:12px 28px;background:linear-gradient(90deg,#1d5fb8,#3b82f6);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;">${title}</a></p>
 			<p style="font-size:12px;color:#93a9bd;"><a href="${link}" style="color:#1d5fb8;word-break:break-all;">${link}</a></p>`,
 			SITE_URL,
 		),

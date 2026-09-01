@@ -22,7 +22,13 @@ export const GET: APIRoute = async ({ params, locals }) => {
 	obj.writeHttpMetadata(headers);
 	headers.set('etag', obj.httpEtag);
 	headers.set('cache-control', 'public, max-age=31536000, immutable');
-	if (!headers.has('content-type')) headers.set('content-type', 'application/octet-stream');
+	const contentType = headers.get('content-type') ?? 'application/octet-stream';
+	if (!headers.has('content-type')) headers.set('content-type', contentType);
+	// SVG 可内嵌脚本：强制下载 + 沙箱 CSP，防同源 XSS
+	if (contentType.includes('image/svg+xml')) {
+		headers.set('content-disposition', 'attachment');
+		headers.set('content-security-policy', 'sandbox');
+	}
 
 	return new Response(obj.body, { headers });
 };

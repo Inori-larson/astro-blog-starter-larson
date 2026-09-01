@@ -118,12 +118,28 @@ if (redirect) return redirect;
 		document.getElementById('post-rows')?.addEventListener('click', async (e) => {
 			const btn = (e.target as HTMLElement).closest('[data-del]') as HTMLButtonElement | null;
 			if (!btn) return;
-			if (!confirm('确定删除这篇文章？（前台将不再可见）')) return;
-			const res = await fetch(`/api/admin/posts/${btn.dataset.del}`, {
-				method: 'DELETE',
-				headers: { 'Content-Type': 'application/json' },
-			});
-			if (res.ok) load();
+			if (!confirm('确定删除这篇文章？（前台将不再可见，评论/点赞/浏览数据一并清除）')) return;
+			btn.disabled = true;
+			try {
+				const res = await fetch(`/api/admin/posts/${btn.dataset.del}`, {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+				});
+				if (res.status === 401) {
+					window.location.href = '/admin/login';
+					return;
+				}
+				if (!res.ok) {
+					const data = (await res.json().catch(() => ({}))) as { error?: string };
+					alert(data.error || '删除失败，请重试');
+					return;
+				}
+				load();
+			} catch {
+				alert('网络错误，删除失败');
+			} finally {
+				btn.disabled = false;
+			}
 		});
 
 		load();

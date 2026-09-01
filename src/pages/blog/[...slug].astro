@@ -10,10 +10,12 @@ export const prerender = false;
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect('/blog/');
+// slug 格式校验：不合法直接 404，不产生缓存键与数据库查询
+if (!/^[a-z0-9-]+$/.test(slug)) return Astro.rewrite('/404');
 
 const db = getDb(Astro);
 const post = await cached(Astro, `post:${slug}`, 300, () => getPostBySlug(db, slug));
-if (!post) return Astro.redirect('/404');
+if (!post) return Astro.rewrite('/404');
 
 const [neighborInfo, related, likeState, viewCount] = await Promise.all([
 	getNeighbors(db, post.publishedAt),

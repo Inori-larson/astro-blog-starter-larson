@@ -28,7 +28,7 @@ export async function listApprovedComments(db: Db, postId: number): Promise<Comm
 	return rows;
 }
 
-/** 新增评论（默认 pending，审核通过后可见） */
+/** 新增评论（待审核，后台通过后前台可见） */
 export async function createComment(
 	db: Db,
 	postId: number,
@@ -43,11 +43,21 @@ export async function createComment(
 			authorEmail: data.authorEmail ?? null,
 			authorUrl: data.authorUrl ?? null,
 			content: data.content,
-			status: 'approved', // 免费版暂无 Turnstile key，先直接通过；第 3 期接入后台审核后改回 pending
+			status: 'pending',
 			ipHash: data.ipHash,
 		})
 		.returning({ id: comments.id });
 	return row.id;
+}
+
+/** 校验父评论：存在、同文章、已通过审核（防跨文章挂载与孤儿楼中楼） */
+export async function isValidParentComment(db: Db, postId: number, parentId: number): Promise<boolean> {
+	const [row] = await db
+		.select({ id: comments.id })
+		.from(comments)
+		.where(and(eq(comments.id, parentId), eq(comments.postId, postId), eq(comments.status, 'approved')))
+		.limit(1);
+	return !!row;
 }
 
 /** 点赞数 / 当前访客是否已点赞 */

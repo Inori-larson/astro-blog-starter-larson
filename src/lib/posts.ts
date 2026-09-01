@@ -193,12 +193,6 @@ export async function listTagCounts(db: Db): Promise<{ name: string; count: numb
 		.sort((a, b) => b.count - a.count);
 }
 
-/** 指定标签下的文章列表 */
-export async function listPostsByTag(db: Db, tagName: string): Promise<PostListItem[]> {
-	const all = await listPosts(db);
-	return all.filter((p) => p.tags.includes(tagName));
-}
-
 /** 搜索索引文档（含正文纯文本与标签） */
 export async function listSearchDocs(
 	db: Db,
